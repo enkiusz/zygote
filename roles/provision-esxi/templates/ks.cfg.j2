@@ -1,0 +1,34 @@
+{{ ansible_managed | comment }}
+accepteula
+
+{# The first() filter is a hack as the json_query always seems to return a list even if there is just one item matching #}
+rootpw --iscrypted {{ esxi_config.auth.users | json_query("[?userid=='root'].password_hash") | first }}  
+
+clearpart --firstdisk={{ esxi_config.storage.rootdisk.uuid }},{{ esxi_config.storage.rootdisk.type }}
+{% for ds in esxi_config.storage.datastores %}
+  clearpart --overwritevmfs --drives={{ ds.device_uuid }}
+{% endfor %}
+
+install --firstdisk={{ esxi_config.storage.rootdisk.uuid }},{{ esxi_config.storage.rootdisk.type }} {{ esxi_config.installer.flags }} 
+
+network --bootproto={{ esxi_config.network.proto }} 
+
+{% if esxi_config.licensing.serialnum is defined %} 
+serialnum --esx={{esxi_config.licensing.serialnum}} 
+{% endif %} 
+reboot 
+
+%post --interpreter=busybox
+
+wget '{{ zygote_store.report_state_url }}?id={{ prov_id.stdout }}&state=post-install'
+
+%firstboot --interpreter=busybox
+esxcli system hostname set --fqdn={{ inventory_hostname }} 
+vim-cmd hostsvc/enable_ssh
+vim-cmd hostsvc/start_ssh
+
+{% for user in esxi_config.auth.users %}
+  {% for key in user.authorized_keys %}
+echo "{{ key.type }} {{ key.key }} {{ key.name }}" >> /etc/ssh/keys-{{ user.userid }}/authorized_keys
+  {% endfor %}
+{% endfor %}

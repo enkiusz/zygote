@@ -1,0 +1,2 @@
+---
+admin_ssh_keys: "{{ vault_admin_ssh_keys }}"

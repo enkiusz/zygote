@@ -1,0 +1,65 @@
+---
+- name: Create user for running zygote
+  user:
+    name: "{{ zygote_config.user }}"
+    groups: ssh-user
+
+- name: Add SSH keys for "{{ zygote_config.user }}"
+  authorized_key:
+    key: "{{ item.type }} {{ item.key }} {{ item.name }}"
+    user: "{{ zygote_config.user }}"
+  with_items: "{{ admin_ssh_keys }}"
+
+- name: Install packages
+  package:
+    state: present
+    name:
+      - sudo
+      - pwgen
+      - dnsmasq
+      - thttpd
+
+- name: Create the directories (root owned)
+  file: path="{{ item }}" state=directory 
+  with_items:
+    - "{{ zygote_store.tftproot }}"
+    - "{{ zygote_store.tftproot }}/cgi-bin"
+    - "{{ zygote_config.config_root }}"
+
+- name: Create directories available to "{{ zygote_config.user }}"
+  file: path="{{ item }}" state=directory owner="{{ zygote_config.user }}"
+  with_items:
+    - "{{ zygote_store.tftproot }}/host"
+    - "{{ zygote_store.tftproot }}/images"
+    - "{{ zygote_config.config_root }}/hosts-{{ zygote_network.interface }}.d"
+    - "{{ zygote_config.config_root}}/dnsmasq-{{ zygote_network.interface }}.conf.d"
+
+- name: Install files from templates
+  template: src="{{ item.src }}" dest="{{ item.dest if item.dest is defined else (item.destdir + '/' + (item.src | basename | replace('.j2',''))) }}"
+  with_items:
+    - src: dnsmasq@.service.j2
+      destdir: "{{ zygote_config.systemd_unit_root }}"
+    - src: thttpd.service.j2
+      destdir: "{{ zygote_config.systemd_unit_root }}"
+    - src: allow-dnsmasq-restart.j2
+      destdir: /etc/sudoers.d
+    - src: dnsmasq.conf.j2
+      dest: "{{ zygote_config.config_root }}/dnsmasq-{{ zygote_network.interface }}.conf"
+    - src: host-index.html
+      dest: "{{ zygote_store.tftproot }}/host/index.html"
+
+- name: Install CGI script
+  template: src=report-state.cgi.j2 dest="{{ zygote_store.tftproot }}/cgi-bin/report-state.cgi" mode=a+x
+
+- name: Configuring interface address
+  command: "ip a replace {{ zygote_network.address.ipv4 }} dev {{ zygote_network.interface }}"
+
+- name: Up interface
+  command: "ip l set up dev {{ zygote_network.interface }}"
+
+- name: Start dnsmasq
+  service: name='dnsmasq@{{ zygote_network.interface }}.service' enabled=yes state=restarted
+
+- name: Start thttpd
+  service: name='thttpd.service' enabled=yes state=restarted
+

@@ -1,0 +1,22 @@
+#!/usr/bin/env python2
+# {{ ansible_managed }}
+
+import cgi, re, sys, os
+import cgitb; cgitb.enable()  # for troubleshooting
+
+print "Content-type: text/html"
+print
+
+form = cgi.FieldStorage()
+
+id = form.getvalue("id", None)
+state = form.getvalue("state", None)
+
+if id is None or state is None:
+    sys.exit(0)
+
+if not re.match(r"[a-zA-Z0-9-_]+", id):
+    sys.exit(0)
+
+open(os.path.join('{{ zygote_store.tftproot }}', 'host', id, 'state', state), 'wb').close()
+

@@ -1,0 +1,13 @@
+{{ ansible_managed | comment }}
+[Unit]
+Description=A lightweight DHCP and caching DNS server for zygote interface %i
+After=network.target
+
+[Service]
+Type=simple
+ExecStartPre=/usr/sbin/dnsmasq --test
+ExecStart=/usr/sbin/dnsmasq -k --user=dnsmasq --group=dnsmasq -C {{ zygote_config.config_root }}/dnsmasq-%i.conf
+ExecReload=/bin/kill -HUP $MAINPID
+
+[Install]
+WantedBy=multi-user.target

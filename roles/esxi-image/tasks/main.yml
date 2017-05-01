@@ -1,0 +1,84 @@
+---
+- name: Install syslinux version old enough so that it can load VMware ESXi multiboot files
+  package:
+    state: present
+    name:
+      - sys-boot/syslinux-3.86
+      - p7zip
+
+# For some of these vars look into vars/main.yml
+- name: Create dirs for ESXi
+  file: path="{{ item }}" state=directory
+  with_items:
+    - "{{ store_tgt_dir }}"
+    - "{{ store_skel_dir }}"
+
+- name: Copy ISO
+  copy: src="{{ esxi_iso_path }}" dest="{{ store_tgt_dir }}"
+
+- name: Extract ISO to new directory
+  # iso_extract:
+  #   image: "{{ zygote_config.tftproot }}/{{ vmware.software_tag }}/{{ vmware.version_tag }}/{{ vmware.iso_file | basename }}"
+  #   dest: "{{ zygote_config.tftproot }}/{{ vmware.software_tag }}/{{ vmware.version_tag }}"
+  #   files: "*"
+  # Travel without moving ...
+  command: "7z x -o{{ store_tgt_dir }} {{ store_tgt_dir }}/{{ esxi_iso_path | basename }}"
+  args:
+    creates: "{{ store_tgt_dir }}/BOOT.CFG"
+
+- name: Link lowercase filenames (plain files only)
+  command: "bash -c 'for f in `find -type f -depth`; do fn=$(basename $f); ln $f $(dirname $f)/${fn,,} || true ; done'"
+  args:
+    chdir: "{{ store_tgt_dir }}"
+    creates: "{{ store_tgt_dir }}/boot.cfg"
+
+- name: Create skel
+  copy: src="{{ item }}" dest="{{ store_skel_dir }}/"
+  with_fileglob:
+    - "{{ syslinux_gpxelinux_image }}"
+    - "{{ store_tgt_dir }}/*.c32"
+    - "{{ store_tgt_dir }}/*.cfg"
+
+- name: Check if boot.cfg is marked as ready
+  stat: path="{{ store_skel_dir }}/boot.cfg.ready"
+  register: marker
+
+- name: Change the main boot.cfg config file into a template (needed to deploy hosts later)
+  command: "mv {{ store_skel_dir }}/boot.cfg {{ store_skel_dir }}/boot.cfg.j2"
+  args:
+    creates: "{{ store_skel_dir }}/boot.cfg.j2"
+  # We wrap the replace in a marker file like this because we don't know how to make this task idempotent
+  when: marker.stat.isreg is not defined
+
+# Reference: https://pubs.vmware.com/vsphere-50/index.jsp?topic=%2Fcom.vmware.vsphere.install.doc_50%2FGUID-2F0D4696-3681-4C13-9552-5280C6406376.html
+- name: Rewrite boot.cfg to download modules via HTTP
+  replace:
+    path: "{{ store_skel_dir }}/boot.cfg.j2"
+    regexp: '/(\w+\.\w{2,3})'
+    replace: '{{ zygote_store.http_baseurl }}/{{ tgt_dir }}/\1'
+  # We wrap the replace in a marker file like this because we don't know how to make this task idempotent
+  when: marker.stat.isreg is not defined
+
+- name: Rewrite boot.cfg to contain a link to a kickstart file
+  replace:
+    path: "{{ store_skel_dir }}/boot.cfg.j2"
+    regexp: '^(kernelopt=.+)'
+    # Reference: http://jinja.pocoo.org/docs/2.9/templates/#escaping
+    replace: '\1 ks={{ "{{" }} kickstart_url {{ "}}" }}'
+  # We wrap the replace in a marker file like this because we don't know how to make this task idempotent
+  when: marker.stat.isreg is not defined
+
+- name: Mark bootcfg as ready
+  file: path="{{ store_skel_dir }}/boot.cfg.ready" state=touch
+
+- name: Build image desriptor
+  set_fact:
+    imgconfig:
+      tgt_dir: "{{ tgt_dir }}"
+      store_tgt_dir: "{{ zygote_store.tftproot }}/{{ tgt_dir }}"
+      skel_dir: "{{ tgt_dir }}/skel"
+      store_skel_dir: "{{ zygote_store.tftproot }}/{{ skel_dir }}"
+
+- name: Dump configuration for this image
+  copy: dest="{{ store_tgt_dir }}/imageconfig.yml" content="{{ imgconfig | to_nice_yaml }}"
+
