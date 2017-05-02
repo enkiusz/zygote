@@ -17,7 +17,7 @@ esxi_config:
   auth:
     users:
       - userid: root
-        password_hash: "{{ vault_admin_root_password | password_hash('sha512') }}"
+        password_hash: "{{ admin_root_password | password_hash('sha512') }}"
         authorized_keys: "{{ admin_ssh_keys }}"
 
   storage:
@@ -89,6 +89,14 @@ esxi_config:
       # Other UIDs: vml.0000000000766d68626133323a303a30
       uuid: vml.0000000000766d68626133323a303a30
       type: usb
+
+  networking:
+    switches:
+      - name: TB
+        uplinks:
+          - name: vmnic1
+        portgroups:
+          - name: VMs
 
   installer:
     flags: --overwritevmfs
