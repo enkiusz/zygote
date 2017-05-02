@@ -1,0 +1,12 @@
+---
+vmfs_partition_guid: AA31E02A400F11DB9590000C2911D1B8
+
+scratch_path: "/vmfs/volumes/datastore1/locker-{{ ansible_hostname }}"
+
+images_path: /vmfs/volumes/datastore1/iso
+
+images:
+  - name: sysrescuecd
+    url: http://downloads.sourceforge.net/project/systemrescuecd/sysresccd-x86/4.9.6/systemrescuecd-x86-4.9.6.iso
+    local_file: systemrescuecd-x86-4.9.6.iso
+

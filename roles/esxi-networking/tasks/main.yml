@@ -1,0 +1,31 @@
+---
+# excfg-* commands are deprecated, they should be replaced with esxcli whenever possible
+# Reference: https://pubs.vmware.com/vsphere-50/index.jsp?topic=%2Fcom.vmware.vcli.migration.doc_50%2Fcos_upgrade_technote.1.9.html
+
+- name: Check what vSwitches have been created
+  command: esxcli network vswitch standard list
+  register: fact_vswitches
+
+- name: Check what port groups have been created
+  command: esxcli network vswitch standard portgroup list
+  register: fact_portgroups
+
+- name: Create vswitches
+  command: "esxcli network vswitch standard add -v {{ item.name }}"
+  when: fact_vswitches.stdout.find('{{ item.name }}') == -1
+  with_items: "{{ esxi_config.networking.switches }}"
+
+- name: Create uplinks
+  command: "esxcli network vswitch standard uplink add -v {{ item[0].name }} -u {{ item[1].name }}"
+  when: fact_vswitches.stdout.find('{{ item[1].name }}') == -1
+  with_subelements:
+    - "{{ esxi_config.networking.switches }}"
+    - uplinks
+
+- name: Create portgroups
+  command: "esxcli network vswitch standard portgroup add -v {{ item[0].name }} -p {{ item[1].name }}"
+  when: fact_portgroups.stdout.find("{{ item[1].name }}") == -1
+  with_subelements:
+    - "{{ esxi_config.networking.switches }}"
+    - portgroups
+
