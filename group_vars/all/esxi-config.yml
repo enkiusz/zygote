@@ -1,0 +1,2 @@
+---
+esxi_serial_number: "{{ vault_esxi_serial_number }}"

@@ -105,4 +105,4 @@ esxi_config:
     proto: dhcp
 
   licensing:
-    # serialnum: vault_esxi_serial_number
+    serialnum: esxi_serial_number
