@@ -1,0 +1,33 @@
+---
+esxi_config:
+
+  # The ESXi where the machine will be provisioned
+  host: newton
+
+  # The VM configuration
+  vm:
+    name: minmay
+    datastore: datastore1
+    display_name: Minmay (storage VM)
+    vcpus: 1
+    ramsize_mb: 4096
+    disks:
+      - name: state
+        size_gb: 8
+
+    iso: /vmfs/volumes/datastore1/iso/systemrescuecd-x86-4.9.6.iso
+
+    ifaces:
+      - name: lan
+        plug_into: VMs
+
+    raw_disks:
+      - name: tank0
+        path: /vmfs/volumes/datastore1/tank0.vmdk
+      - name: tank1
+        path: /vmfs/volumes/datastore1/tank1.vmdk
+      - name: tank2
+        path: /vmfs/volumes/datastore1/tank2.vmdk
+      - name: tank3
+        path: /vmfs/volumes/datastore1/tank3.vmdk
+
