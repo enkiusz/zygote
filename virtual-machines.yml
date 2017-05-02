@@ -1,0 +1,11 @@
+---
+- hosts: virtual_machines
+
+  # The machines do not yet exist when we are provisioning them
+  gather_facts: False
+
+  vars:
+    provision: False
+
+  roles:
+    - { role: esxi-virtual-machine, when: provision, delegate_to: "{{ esxi_config.host }}" }

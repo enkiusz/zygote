@@ -1,0 +1,26 @@
+---
+- set_fact: vm_dir="/vmfs/volumes/{{ esxi_config.vm.datastore }}/{{ esxi_config.vm.name }}"
+- set_fact: vmx_path="/vmfs/volumes/{{ esxi_config.vm.datastore }}/{{ esxi_config.vm.name }}/{{ esxi_config.vm.name }}.vmx"
+  
+- name: Create directory for the VM
+  file: state=directory path="{{ vm_dir }}"
+
+- name: Check if not yet registered
+  shell: "vim-cmd vmsvc/getallvms | grep -F '{{ esxi_config.vm.display_name }}' | awk '{print $1;}'"
+  register: vmlist_out
+
+- name: Create VMX file for the VM
+  template: src="basic.vmx.j2" dest="{{ vmx_path }}"
+  vars:
+    vm: "{{ esxi_config.vm }}"
+  when: vmlist_out.stdout == "" 
+
+- name: Create VMDK disks
+  command: "vmkfstools -c {{ item.size_gb }}G {{ vm_dir }}/{{ item.name }}.vmdk"
+  args:
+    creates: "{{ vm_dir }}/{{ item.name }}.vmdk"
+  with_items: "{{ esxi_config.vm.disks }}"
+
+- name: Register VMX
+  command: "vim-cmd solo/registervm {{ vmx_path }}"
+  when: vmlist_out.stdout == "" 

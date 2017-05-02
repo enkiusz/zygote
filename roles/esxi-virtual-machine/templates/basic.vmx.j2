@@ -1,0 +1,59 @@
+{{ ansible_managed | comment }}
+config.version = "8"
+virtualHW.version = "13"
+vmci0.present = "TRUE"
+displayName = "{{ vm.display_name }}"
+numvcpus = "{{ vm.vcpus }}"
+scsi0.present = "TRUE"
+scsi0.sharedBus = "none"
+memsize = "{{ vm.ramsize_mb }}"
+
+# FIXME: This will likely not work for more than 15 disks
+{% if vm.disks is defined %}
+scsi0.virtualDev = "lsilogic"
+  {% for disk in vm.disks %}
+scsi0:{{ loop.index0 }}.present = "TRUE"
+scsi0:{{ loop.index0 }}.fileName = "{{ disk.name }}.vmdk"
+scsi0:{{ loop.index0 }}.deviceType = "scsi-hardDisk"
+  {% endfor %}
+{% endif %}
+
+{% if vm.raw_disks is defined %}
+scsi1.present = "TRUE"
+scsi1.virtualDev = "lsilogic"
+  {% for raw_disk in vm.raw_disks %}
+scsi1:{{ loop.index0 }}.present = "TRUE"
+scsi1:{{ loop.index0 }}.fileName = "{{ raw_disk.path }}"
+scsi1:{{ loop.index0 }}.deviceType = "scsi-hardDisk"
+scsi1:{{ loop.index0 }}.mode = "independent-persistent"
+  {% endfor %}
+{% endif %}
+
+{% if vm.iso is defined %}
+  ide1:0.present = "TRUE"
+  ide1:0.fileName = "{{ vm.iso }}"
+  ide1:0.deviceType = "cdrom-image"
+{% endif %}
+
+{% if vm.ifaces is defined %}
+  {% for iface in vm.ifaces %}
+ethernet{{ loop.index0 }}.present = "TRUE"
+ethernet{{ loop.index0 }}.virtualDev = "vmxnet3"
+ethernet{{ loop.index0 }}.networkName = "{{ iface.plug_into }}"
+  {% endfor %}
+{% endif %}
+guestOS = "other26xlinux-64"
+
+pciBridge0.present = "TRUE"
+pciBridge4.present = "TRUE"
+pciBridge4.virtualDev = "pcieRootPort"
+pciBridge4.functions = "8"
+pciBridge5.present = "TRUE"
+pciBridge5.virtualDev = "pcieRootPort"
+pciBridge5.functions = "8"
+pciBridge6.present = "TRUE"
+pciBridge6.virtualDev = "pcieRootPort"
+pciBridge6.functions = "8"
+pciBridge7.present = "TRUE"
+pciBridge7.virtualDev = "pcieRootPort"
+pciBridge7.functions = "8"
