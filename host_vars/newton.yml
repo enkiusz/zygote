@@ -7,10 +7,11 @@ origin_zygote: shoggoth
 # Inside tftproot
 esxi_image_path: "images/VMware-VMvisor-Installer-201701001-4887370.x86_64"
 
-# Use the deafault datastore
+# The default datastore
 datastore_name: datastore1
 datastore_path: "/vmfs/volumes/{{ datastore_name }}"
 iso_store: "{{ datastore_path }}/iso"
+ova_store: "{{ datastore_path }}/ova"
 tools_store: "{{ datastore_path }}/tools"
 
 esxi_config:
@@ -26,26 +27,21 @@ esxi_config:
       - name: datastore1
         # Local ATA Disk (t10.ATA_____ST31000524AS________________________________________6VPK5J2Z)
         device_uuid: vml.01000000002020202020202020202020203656504b354a325a535433313030
-        # TODO: Autodetect this maybe?
-        max_sectors: "1953525134"
 
       - name: datastore2
         # Local ATA Disk (t10.ATA_____HITACHI_HUA722010ALA330_________________N12KATJL____________)
         device_uuid: vml.01000000004e31324b41544a4c202020202020202020202020484954414348
-        # TODO: Autodetect this maybe?
-        max_sectors: "1953525134"
+
 
       - name: datastore3
         # Local ATA Disk (t10.ATA_____ST1000DM0032D1CH162__________________________________Z1D2XB6H)
         device_uuid: vml.01000000002020202020202020202020205a31443258423648535431303030
-        # TODO: Autodetect this maybe?
-        max_sectors: "1953525134"
+
 
       - name: datastore4
         # Local ATA Disk (t10.ATA_____SAMSUNG_HD154UI_________________________S1Y6J1LS706055______)
         device_uuid: vml.0100000000533159364a314c5337303630353520202020202053414d53554e
-        # TODO: Autodetect this maybe?
-        max_sectors: "2930277134"
+
 
     passthrough:
       - name: tank0
