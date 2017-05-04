@@ -4,7 +4,6 @@
   # This part runs as root, it configures an empty zygote
 
   roles:
-    - zygote_config
     - zygote
 
 - hosts: zygotes
@@ -15,5 +14,4 @@
     ansible_user: zygote
 
   roles:
-    - zygote_config
     - { role: esxi-image, esxi_iso_path: "VMware-VMvisor-Installer-201701001-4887370.x86_64/VMware-VMvisor-Installer-201701001-4887370.x86_64.iso" }
