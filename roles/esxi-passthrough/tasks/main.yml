@@ -1,0 +1,5 @@
+---
+- name: Create passthrough device
+  command: "vmkfstools -z /vmfs/devices/disks/{{ passthrough.device_uuid }} /vmfs/volumes/{{ passthrough.target_datastore }}/{{ passthrough.name }}.vmdk"
+  args:
+    creates: "/vmfs/volumes/{{ passthrough.target_datastore }}/{{ passthrough.name }}.vmdk"

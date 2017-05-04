@@ -1,0 +1,8 @@
+---
+- name: Create dirs
+  file: state=directory path="{{ item }}"
+  with_items:
+    - "{{ iso_store }}"
+    - "{{ ova_store }}"
+    - "{{ tools_store }}"
+

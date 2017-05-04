@@ -1,0 +1,2 @@
+---
+scratch_path: "/vmfs/volumes/datastore1/locker-{{ ansible_hostname }}"

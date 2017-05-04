@@ -1,0 +1,18 @@
+---
+- name: Create a persistent scratchspace directory
+  file: path="{{ scratch_path }}" state=directory
+
+- name: Check if persistent scratchspace is set
+  shell: "vim-cmd hostsvc/advopt/view ScratchConfig.ConfiguredScratchLocation 2>&1 | egrep 'value = \".+\"'"
+  register: scratchspace_check_out
+
+- name: Set the scratch space parameterp
+  command: "vim-cmd hostsvc/advopt/update ScratchConfig.ConfiguredScratchLocation string {{ scratch_path }}"
+  when: scratchspace_check_out.stdout == ""
+
+# A reboot is required to activate the scratch space
+- shell: reboot
+  when: scratchspace_check_out.stdout == ""
+
+- name: Wait for SSH
+  wait_for_connection: delay=10 timeout=600

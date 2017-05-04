@@ -8,18 +8,13 @@
   gather_facts: False
 
   roles:
-    - zygote_config
-    - { role: provision-esxi, delegate_to: "{{ origin_zygote }}", ansible_user: "{{ zygote_config.user }}", when: 'provision | bool' }
+    - { role: provision-esxi, delegate_to: "{{ origin_zygote }}", ansible_user: "{{ hostvars[origin_zygote].zygote_config.user }}", when: provision }
 
 - hosts: vmwares
 
-  vars:
-    provision: False
-
   roles:
-    # This role is not 100% idempotent
-    - { role: esxi-datastores, when: provision }
-    # Don't have proper certificate generation yet
+    - esxi-datastores
+    - esxi-directories
+    - esxi-scratchspace
     - esxi-networking
-
-
+    - ovftool
