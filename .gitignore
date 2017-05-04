@@ -1,3 +1,4 @@
 *.vault.yml
 *.retry
-
+.#*
+*.iso
