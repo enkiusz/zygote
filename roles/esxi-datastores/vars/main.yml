@@ -1,12 +1,14 @@
 ---
-vmfs_partition_guid: AA31E02A400F11DB9590000C2911D1B8
-
-scratch_path: "/vmfs/volumes/datastore1/locker-{{ ansible_hostname }}"
-
 images_path: /vmfs/volumes/datastore1/iso
 
 images:
   - name: sysrescuecd
     url: http://downloads.sourceforge.net/project/systemrescuecd/sysresccd-x86/4.9.6/systemrescuecd-x86-4.9.6.iso
     local_file: systemrescuecd-x86-4.9.6.iso
+  - name: ubuntuserver
+    url: http://releases.ubuntu.com/16.04.2/ubuntu-16.04.2-server-amd64.iso
+    local_file: ubuntu-16.04.2-server-amd64.iso
+  - name: debian
+    url: http://cdimage.debian.org/debian-cd/current/amd64/iso-cd/debian-8.7.1-amd64-netinst.iso
+    local_file: debian-8.7.1-amd64-netinst.iso
 

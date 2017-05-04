@@ -1,28 +1,17 @@
 ---
-- name: Create partitions
-  command: "partedUtil setptbl /dev/disks/{{ item.device_uuid }} gpt '1 2048 {{ item.max_sectors }} {{ vmfs_partition_guid }} 0'"
-  with_items: "{{ esxi_config.storage.datastores }}"
+- include_role:
+    name: esxi-datastore
+  with_items:
+    - "{{ esxi_config.storage.datastores }}"
+  loop_control:
+    loop_var: datastore
 
-- name: Create filesystems
-  command: "vmkfstools -C vmfs6 -S {{ item.name }} /dev/disks/{{ item.device_uuid }}:1"
-  args:
-    creates: "/vmfs/volumes/{{ item.name }}"
-  with_items: "{{ esxi_config.storage.datastores }}"
-
-- name: Create passthrough devices
-  command: "vmkfstools -z /vmfs/devices/disks/{{ item.device_uuid }} /vmfs/volumes/{{ item.target_datastore }}/{{ item.name }}.vmdk"
-  args:
-    creates: "/vmfs/volumes/{{ item.target_datastore }}/{{ item.name }}.vmdk"
-  with_items: "{{ esxi_config.storage.passthrough }}"
-
-- name: Create a persistent scratchspace directory
-  file: path="{{ scratch_path }}" state=directory
-
-- name: Set the scratch space parameterp
-  command: "vim-cmd hostsvc/advopt/update ScratchConfig.ConfiguredScratchLocation string {{ scratch_path }}"
-
-- name: Create ISO directory
-  file: path="{{ images_path }}" state=directory
+- include_role:
+    name: esxi-passthrough
+  with_items:
+    - "{{ esxi_config.storage.passthrough }}"
+  loop_control:
+    loop_var: passthrough
 
 - name: Download images to local disk
   delegate_to: localhost
@@ -30,17 +19,4 @@
   args:
     creates: "{{ item.local_file }}"
   with_items: "{{ images }}"
-    
-# We need to directly call scp because the copy module first copies the files to a temporary directory in ~/.ansible
-# This causes the filesystem to fill up.
-- name: Copy the ISO files
-  delegate_to: localhost
-  command: "scp {{ item.local_file }} {{ ansible_user }}@{{ ansible_host }}:{{ images_path }}"
-  with_items: "{{ images }}"
 
-# A reboot is required to activate the scratch space
-- name: Restart server
-  shell: reboot
-
-- name: Wait for SSH
-  wait_for_connection: delay=10 timeout=600
