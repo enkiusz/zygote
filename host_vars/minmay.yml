@@ -15,7 +15,7 @@ esxi_config:
       - name: state
         size_gb: 8
 
-    iso: /vmfs/volumes/datastore1/iso/systemrescuecd-x86-4.9.6.iso
+    iso: systemrescuecd-x86-4.9.6.iso
 
     ifaces:
       - name: lan
