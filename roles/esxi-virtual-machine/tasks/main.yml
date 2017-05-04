@@ -1,7 +1,10 @@
 ---
 - set_fact: vm_dir="/vmfs/volumes/{{ esxi_config.vm.datastore }}/{{ esxi_config.vm.name }}"
 - set_fact: vmx_path="/vmfs/volumes/{{ esxi_config.vm.datastore }}/{{ esxi_config.vm.name }}/{{ esxi_config.vm.name }}.vmx"
-  
+
+- set_fact: iso="{{ hostvars[esxi_config.host].iso_store }}/{{ esxi_config.vm.iso }}"
+  when: esxi_config.vm.iso is defined
+
 - name: Create directory for the VM
   file: state=directory path="{{ vm_dir }}"
 

@@ -29,9 +29,9 @@ scsi1:{{ loop.index0 }}.mode = "independent-persistent"
   {% endfor %}
 {% endif %}
 
-{% if vm.iso is defined %}
+{% if iso is defined %}
   ide1:0.present = "TRUE"
-  ide1:0.fileName = "{{ vm.iso }}"
+  ide1:0.fileName = "{{ iso }}"
   ide1:0.deviceType = "cdrom-image"
 {% endif %}
 
