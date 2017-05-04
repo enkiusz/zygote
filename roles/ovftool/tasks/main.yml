@@ -1,0 +1,17 @@
+---
+# This is f...in slow
+# - name: Copy ovftool
+#   copy: dest="{{ tools_store }}" src="{{ ovftool_source_dir }}"
+
+- name: Pack ovftool
+  delegate_to: localhost
+  archive: path="{{ ovftool_source_dir }}" dest="/tmp/vmware-ovftool.tar.gz"
+
+- name: Copy to esxi
+  copy: src="/tmp/vmware-ovftool.tar.gz" dest="{{ tools_store }}"
+
+- name: Extract tarball
+  command: "tar -C {{ tools_store }} -xzvf {{ tools_store }}/vmware-ovftool.tar.gz"
+
+- name: Rewrite to use sh
+  replace: path="{{ tools_store }}/vmware-ovftool/ovftool" regexp="#!/bin/bash" replace="#!/bin/sh"

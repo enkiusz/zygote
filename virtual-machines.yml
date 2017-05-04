@@ -4,8 +4,7 @@
   # The machines do not yet exist when we are provisioning them
   gather_facts: False
 
-  vars:
-    provision: False
-
   roles:
-    - { role: esxi-virtual-machine, when: provision, delegate_to: "{{ esxi_config.host }}" }
+    - { role: esxi-virtual-machine, when: "esxi_config.vm.iso is defined", delegate_to: "{{ esxi_config.host }}" }
+    - { role: esxi-deploy-ova, when: "esxi_config.vm.appliance_src is defined", delegate_to: "{{ esxi_config.host }}" }
+

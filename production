@@ -7,3 +7,5 @@ shoggoth ansible_user=root ansible_python_interpreter=/usr/bin/python2 ansible_s
 
 [virtual_machines]
 minmay  ansible_user=root
+win11test
+

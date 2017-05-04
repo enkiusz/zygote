@@ -1,0 +1,3 @@
+---
+# OVF needs to be installed here
+ovftool_source_dir: /usr/lib/vmware-ovftool

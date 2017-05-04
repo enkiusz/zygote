@@ -1,0 +1,21 @@
+---
+- set_fact: esxi_vars="{{ hostvars[esxi_config.host] }}"
+
+- name: Check if ova directory exists
+  stat: path="{{ esxi_vars.ova_store }}/{{ esxi_config.vm.appliance_src }}"
+  register: ova
+
+- name: Upload OVA to host
+  delegate_to: localhost
+  command: "scp -r {{ esxi_config.vm.appliance_src }} {{ ansible_user }}@{{ ansible_host }}:{{ esxi_vars.ova_store }}"
+  when: not ova.stat.exists
+
+- name: Check if OVA deployed
+  shell: "vim-cmd vmsvc/getallvms | grep -F '{{ esxi_config.vm.display_name }}' | awk '{print $1;}'"
+  register: vmlist_out
+
+# FIXME: SSL should be verified
+- name: Deploy OVA using ovftool
+  shell: "{{ esxi_vars.tools_store }}/vmware-ovftool/ovftool --noSSLVerify --datastore={{ esxi_config.vm.datastore }} --diskMode=thin --name='{{ esxi_config.vm.display_name }}' {{ esxi_vars.ova_store }}/{{ esxi_config.vm.appliance_src }}/*.ovf vi://root:{{ admin_root_password }}@localhost"
+  when: vmlist_out.stdout == "" 
+
