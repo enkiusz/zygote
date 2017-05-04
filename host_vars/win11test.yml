@@ -1,0 +1,13 @@
+---
+esxi_config:
+
+  # The ESXi where the machine will be provisioned
+  host: newton
+
+  # VM configuration
+  vm:
+    name: win11test
+    datastore: datastore1
+    display_name: Test OVA deployment from modern.ie
+
+    appliance_src: IE11.Win8.1.For.Windows.VMware
