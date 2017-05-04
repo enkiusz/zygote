@@ -15,3 +15,9 @@
 
   roles:
     - { role: esxi-image, esxi_iso_path: "VMware-VMvisor-Installer-201701001-4887370.x86_64/VMware-VMvisor-Installer-201701001-4887370.x86_64.iso" }
+    - { role: plain-image, sourcedir: "IE11.Win8.1.For.Windows.VMware"  }
+    - { role: plain-image, sourcefile: "debian-8.7.1-amd64-netinst.iso"  }
+    - { role: plain-image, sourcefile: "systemrescuecd-x86-4.9.6.iso"  }
+    - { role: plain-image, sourcefile: "ubuntu-16.04.2-server-amd64.iso"  }
+    - { role: plain-image, sourcefile: "vyos-1.1.7-amd64.iso"  }
+    - { role: plain-image, sourcefile: "vyos-1.1.7-i586.iso"  }
