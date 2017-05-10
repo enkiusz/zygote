@@ -1,0 +1,2 @@
+dhcp-boot=tag:boot-{{ prov_id.stdout }},{{ imageconfig.tgt_dir }}/pxelinux.0
+dhcp-option-force=tag:boot-{{ prov_id.stdout }},209,::{{ prov_dir }}/boot/pxelinux.cfg 

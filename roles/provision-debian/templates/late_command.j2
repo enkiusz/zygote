@@ -1,0 +1,11 @@
+#!/bin/sh
+
+wget '{{ zygote_store.report_state_url }}?id={{ prov_id.stdout }}&state=post-install'
+
+{% for user in esxi_config.vm.auth.users %}
+mkdir /target/$(getent passwd {{ user.userid }})/.ssh/
+  {% for key in user.authorized_keys %}
+echo "{{ key.type }} {{ key.key }} {{ key.name }}" >> /target/$(getent passwd {{ user.userid }})/.ssh/authorized_keys
+  {% endfor %}
+{% endfor %}
+

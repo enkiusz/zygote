@@ -15,6 +15,7 @@
 
   roles:
     - { role: esxi-image, esxi_iso_path: "VMware-VMvisor-Installer-201701001-4887370.x86_64/VMware-VMvisor-Installer-201701001-4887370.x86_64.iso" }
+    - { tags: testing, role: debian-netboot-image, netboot_archive: "debian-jessie-netboot.tar.gz" }
     - { role: plain-image, sourcedir: "IE11.Win8.1.For.Windows.VMware"  }
     - { role: plain-image, sourcefile: "debian-8.7.1-amd64-netinst.iso"  }
     - { role: plain-image, sourcefile: "systemrescuecd-x86-4.9.6.iso"  }

@@ -5,6 +5,16 @@
   gather_facts: False
 
   roles:
-    - { role: esxi-virtual-machine, when: "esxi_config.vm.iso is defined", delegate_to: "{{ esxi_config.host }}" }
+    - { role: esxi-virtual-machine, when: "esxi_config.vm.vcpus is defined", delegate_to: "{{ esxi_config.host }}" }
     - { role: esxi-deploy-ova, when: "esxi_config.vm.appliance_src is defined", delegate_to: "{{ esxi_config.host }}" }
 
+- hosts: debiantest
+
+  vars:
+    provision: false
+
+  # For provisioning only, gathering facts doesn't work until the host is provisioned
+  gather_facts: False
+
+  roles:
+    - { role: provision-debian, delegate_to: "{{ origin_zygote }}", when: provision }

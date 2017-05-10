@@ -1,0 +1,31 @@
+---
+origin_zygote: shoggoth
+
+netboot_image_path: images/debian-jessie-netboot
+
+esxi_config:
+
+  host: newton
+
+  vm:
+    auth:
+      users:
+        - userid: root
+          password_hash: "{{ admin_root_password | password_hash('sha512') }}"
+          authorized_keys: "{{ admin_ssh_keys }}"
+
+    name: debiantest
+    display_name: debiantest
+
+    datastore: datastore1
+    vcpus: 1
+    ramsize_mb: 2048
+    disks:
+      - name: state
+        size_gb: 16
+
+    ifaces:
+      - name: lan
+        plug_into: VM Network
+
+

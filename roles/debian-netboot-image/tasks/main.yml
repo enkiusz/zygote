@@ -1,0 +1,30 @@
+---
+# For some of these vars look into vars/main.yml
+- name: Create dirs for Debian
+  file: path="{{ item }}" state=directory
+  with_items:
+    - "{{ store_tgt_dir }}"
+    - "{{ store_skel_dir }}"
+
+- name: Extract netboot archive
+  unarchive: src="{{ netboot_archive }}" dest="{{ store_tgt_dir }}"
+
+- name: Create skel pxelinux.cfg
+  copy: src="{{ store_tgt_dir }}/pxelinux.cfg/default" dest="{{ store_skel_dir }}/pxelinux.cfg.j2"
+
+- name: Rewrite debian pxelinux.cfg to boot automatically
+  replace: path="{{ store_skel_dir }}/pxelinux.cfg.j2" regexp="timeout 0" replace="timeout 1"
+
+- name: Rewrite debian pxelinux.cfg to boot the automated installer
+  replace: path="{{ store_skel_dir }}/pxelinux.cfg.j2" regexp="default .+" replace='default auto url={{ "{{" }} kickstart_url {{ "}}" }}'
+
+- name: Build image desriptor
+  set_fact:
+    imgconfig:
+      tgt_dir: "{{ tgt_dir }}"
+      store_tgt_dir: "{{ zygote_store.tftproot }}/{{ tgt_dir }}"
+      skel_dir: "{{ tgt_dir }}/skel"
+      store_skel_dir: "{{ zygote_store.tftproot }}/{{ skel_dir }}"
+
+- name: Dump configuration for this image
+  copy: dest="{{ store_tgt_dir }}/imageconfig.yml" content="{{ imgconfig | to_nice_yaml }}"

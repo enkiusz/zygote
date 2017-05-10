@@ -11,3 +11,9 @@ esxi_config:
     display_name: Test OVA deployment from modern.ie
 
     appliance_src: IE11.Win8.1.For.Windows.VMware
+
+    ifaces:
+      - name: lan
+        plug_into: VMs
+        tags: post
+
