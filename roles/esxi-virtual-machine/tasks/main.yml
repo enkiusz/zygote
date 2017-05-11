@@ -26,4 +26,21 @@
 
 - name: Register VMX
   command: "vim-cmd solo/registervm {{ vmx_path }}"
-  when: vmlist_out.stdout == "" 
+  when: vmlist_out.stdout == ""
+
+- name: Find virtual machine ID
+  delegate_to: "{{ esxi_config.host }}"
+  shell: "vim-cmd vmsvc/getallvms | grep -F '{{ esxi_config.vm.display_name }}' | awk '{print $1;}'"
+  register: vmlist_out
+
+#
+# We need to powerup/powerdown to generate the MAC addresses
+#
+- name: Power on virtual machine
+  delegate_to: "{{ esxi_config.host }}"
+  command: "vim-cmd vmsvc/power.on {{ vmlist_out.stdout }}"
+
+- name: Power off virtual machine
+  delegate_to: "{{ esxi_config.host }}"
+  command: "vim-cmd vmsvc/power.off {{ vmlist_out.stdout }}"
+
