@@ -111,3 +111,5 @@
 - name: Collect facts
   setup:
 
+- name: Update apt
+  apt: update_cache=yes
