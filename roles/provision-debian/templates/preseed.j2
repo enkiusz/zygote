@@ -95,7 +95,7 @@ d-i netcfg/get_hostname string {{ inventory_hostname }}
 d-i mirror/country string manual
 d-i mirror/http/hostname string http.us.debian.org
 d-i mirror/http/directory string /debian
-d-i mirror/http/proxy string
+d-i mirror/http/proxy string {{ zygote_store.http_baseurl }}:3142
 
 # Suite to install.
 #d-i mirror/suite string testing
@@ -317,7 +317,8 @@ d-i partman/confirm_nooverwrite boolean true
 
 
 ### Package selection
-#tasksel tasksel/first multiselect standard, web-server, kde-desktop
+# tasksel tasksel/first multiselect standard, web-server, kde-desktop 
+tasksel tasksel/first multiselect standard
 
 # Individual additional packages to install
 d-i pkgsel/include string openssh-server
@@ -424,5 +425,5 @@ d-i finish-install/reboot_in_progress note
 # directly, or use the apt-install and in-target commands to easily install
 # packages and run commands in the target system.
 #d-i preseed/late_command string apt-install zsh; in-target chsh -s /bin/zsh
-d-i preseed/late_command string /usr/bin/curl -o /tmp/late_command '{{ zygote_store.http_baseurl }}/host/{{ prov_id.stdout }}/boot/late_command'; chmod +x /tmp/late_command; /tmp/late_command
+d-i preseed/late_command string /usr/bin/wget -O /tmp/late_command '{{ zygote_store.http_baseurl }}/host/{{ prov_id.stdout }}/boot/late_command'; chmod +x /tmp/late_command; /tmp/late_command
 
