@@ -1,0 +1,21 @@
+---
+#
+# Make Gentoo installation more like a Debian wrt. nginx configuration
+#
+- package:
+    state: present
+    name:
+      - augeas
+      - python-augeas
+
+- file: state=directory path=/etc/nginx/sites-enabled
+- file: state=directory path=/etc/nginx/sites-available
+
+- include_role:
+    name: paluh.augeas
+
+- augeas:
+    command=set path=/files/etc/nginx/nginx.conf/http/include value=/etc/nginx/sites-enabled/*.conf
+  notify:
+    - reload nginx
+

@@ -17,7 +17,7 @@
       - sudo
       - pwgen
       - dnsmasq
-      - thttpd
+      - apt-cacher-ng
 
 - name: Create the directories (root owned)
   file: path="{{ item }}" state=directory 
@@ -39,14 +39,17 @@
   with_items:
     - src: dnsmasq@.service.j2
       destdir: "{{ zygote_config.systemd_unit_root }}"
-    - src: thttpd.service.j2
-      destdir: "{{ zygote_config.systemd_unit_root }}"
+    - src: zygote_site.j2
+      destdir: "/etc/nginx/sites-available"
     - src: allow-dnsmasq-restart.j2
       destdir: /etc/sudoers.d
     - src: dnsmasq.conf.j2
       dest: "{{ zygote_config.config_root }}/dnsmasq-{{ zygote_network.interface }}.conf"
     - src: host-index.html
       dest: "{{ zygote_store.tftproot }}/host/index.html"
+
+- name: Enable nginx site
+  file: path=/etc/nginx/sites-enabled/zygote src=/etc/nginx/sites-available/zygote_site state=link
 
 - name: Install CGI script
   template: src=report-state.cgi.j2 dest="{{ zygote_store.tftproot }}/cgi-bin/report-state.cgi" mode=a+x
@@ -60,6 +63,4 @@
 - name: Start dnsmasq
   service: name='dnsmasq@{{ zygote_network.interface }}.service' enabled=yes state=restarted
 
-- name: Start thttpd
-  service: name='thttpd.service' enabled=yes state=restarted
 

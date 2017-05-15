@@ -12,6 +12,6 @@ zygote_store:
   tftproot: /tftproot
 
   # The user ID under status reporting CGI scripts are running
-  cgi_bin_user: nobody
+  cgi_bin_user: nginx
   # The state reporting URL
   report_state_url: http://{{ zygote_network.address.ipv4 | ipaddr('address') }}/cgi-bin/report-state.cgi

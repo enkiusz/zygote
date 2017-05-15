@@ -1,0 +1,18 @@
+{{ ansible_managed | comment }}
+server {
+
+  listen {{ zygote_network.address.ipv4 | ipaddr('address') }}:80;
+
+	root {{ zygote_store.tftproot }};
+
+	index index.html index.htm;
+
+	server_name {{ inventory_hostname }};
+
+	location / {
+		# First attempt to serve request as file, then
+		# as directory, then fall back to displaying a 404.
+		try_files $uri $uri/ =404;
+	}
+}
+
