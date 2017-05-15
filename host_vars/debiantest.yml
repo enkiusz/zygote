@@ -13,6 +13,7 @@ esxi_config:
         - userid: root
           password_hash: "{{ admin_root_password | password_hash('sha512') }}"
           authorized_keys: "{{ admin_ssh_keys }}"
+          ssh_dir: /root/.ssh/
 
     name: debiantest
     display_name: debiantest
@@ -28,4 +29,21 @@ esxi_config:
       - name: lan
         plug_into: VM Network
 
+
+zygote_network:
+  interface: eth0
+  address:
+    ipv4: 192.168.4.112/24
+  dhcp_server:
+    ipv4_range_begin: 192.168.4.160
+    ipv4_range_end: 192.168.4.180
+
+zygote_store:
+  http_baseurl: http://{{ zygote_network.address.ipv4 | ipaddr('address') }}
+  tftproot: /tftproot
+
+  # The user ID under status reporting CGI scripts are running
+  cgi_bin_user: nobody
+  # The state reporting URL
+  report_state_url: http://{{ zygote_network.address.ipv4 | ipaddr('address') }}/cgi-bin/report-state.cgi
 
