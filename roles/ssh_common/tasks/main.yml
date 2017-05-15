@@ -1,0 +1,13 @@
+---
+- name: Create ssh access group
+  group: name="{{ ssh_access_group }}" state=present
+
+- name: "Add root to {{ ssh_access_group }} group"
+  user: append=yes name=root groups="{{ ssh_access_group }}"
+
+- name: "Allow only users belonging to {{ ssh_access_group }}"
+  lineinfile: state=present line="AllowGroups {{ ssh_access_group }}" path=/etc/ssh/sshd_config
+
+- name: Reload sshd config
+  service: name=ssh state=reloaded
+

@@ -18,3 +18,5 @@
 
   roles:
     - { role: provision-debian, delegate_to: "{{ origin_zygote }}", when: provision }
+    - ssh_common
+
