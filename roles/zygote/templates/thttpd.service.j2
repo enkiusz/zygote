@@ -1,9 +1,0 @@
-{{ ansible_managed | comment }}
-[Unit]
-Description="thttpd web server serving {{ zygote_store.tftproot }}"
-
-[Service]
-ExecStart=/usr/sbin/thttpd -D -d {{ zygote_store.tftproot }} -c "/cgi-bin/*"
-
-[Install]
-WantedBy=multi-user.target
