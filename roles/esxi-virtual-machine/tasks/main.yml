@@ -35,7 +35,7 @@
 
 - name: Get VM state
   delegate_to: "{{ esxi_config.host }}"
-  shell: "grep generatedAddress {{ vmx_path }}"
+  shell: "grep 'generatedAddress = ' {{ vmx_path }} || true"
   register: vmaddr_out
 
 #
