@@ -11,6 +11,11 @@
 - file: state=directory path=/etc/nginx/sites-enabled
 - file: state=directory path=/etc/nginx/sites-available
 
+#
+# Gentoo: /run/fcgiwrap.sock, Debian: /run/fcgiwrap.socket
+#
+- file: state=link dest=/run/fcgiwrap.socket src=/run/fcgiwrap.sock
+
 - include_role:
     name: paluh.augeas
 
