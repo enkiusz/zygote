@@ -13,6 +13,16 @@ server {
 		# First attempt to serve request as file, then
 		# as directory, then fall back to displaying a 404.
 		try_files $uri $uri/ =404;
-	}
+  }
+
+  # Based on Debian's default config
+location /cgi-bin/ {
+gzip off;
+root {{ zygote_store.tftproot }};
+fastcgi_pass unix:/run/fcgiwrap.socket;
+include /etc/nginx/fastcgi_params;
+fastcgi_param SCRIPT_FILENAME {{ zygote_store.tftproot }}$fastcgi_script_name;
+}
+
 }
 

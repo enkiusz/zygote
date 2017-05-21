@@ -2,6 +2,8 @@
 - hosts: zygotes
 
   # This part runs as root, it configures an empty zygote
+  vars:
+    ansible_user: root
 
   roles:
     - zygote
@@ -9,9 +11,6 @@
 - hosts: zygotes
 
   # This is where images are deployed
-
-  vars:
-    ansible_user: zygote
 
   roles:
     - { role: esxi-image, esxi_iso_path: "VMware-VMvisor-Installer-201701001-4887370.x86_64/VMware-VMvisor-Installer-201701001-4887370.x86_64.iso" }
