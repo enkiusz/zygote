@@ -80,9 +80,11 @@
   delegate_to: "{{ esxi_config.host }}"
   command: "vim-cmd vmsvc/power.on {{ vmlist_out.stdout }}"
   when: vmstate_out.stdout.find('powerState = "poweredOff"') != -1
-  
-- name: Wait until the installer ends
-  wait_for: path="{{ store_prov_dir }}/state/post-install" state=present delay=30 timeout=6000
+
+- name: "Wait for preseed/late-command to finish for prov id {{ prov_id.stdout }}"
+  wait_for:
+    path: "{{ store_prov_dir }}/state/finished-preseed-late-command"
+    timeout: 6000
 
 # Installer has finished
 - name: Cleanup prov "{{ prov_id.stdout }}"
@@ -110,6 +112,3 @@
 
 - name: Collect facts
   setup:
-
-- name: Update apt
-  apt: update_cache=yes

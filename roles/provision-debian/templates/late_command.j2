@@ -1,7 +1,5 @@
 #!/bin/sh
 
-wget -O - '{{ zygote_store.report_state_url }}?id={{ prov_id.stdout }}&state=post-install'
-
 {% for user in esxi_config.vm.auth.users %}
 mkdir -p /target/{{ user.ssh_dir }}
   {% for key in user.authorized_keys %}
@@ -9,4 +7,6 @@ mkdir -p /target/{{ user.ssh_dir }}
   {% endfor %}
 chmod 400 /target/{{ user.ssh_dir }}/authorized_keys
 {% endfor %}
+
+wget -O - '{{ zygote_store.report_state_url }}?id={{ prov_id.stdout }}&state=finished-preseed-late-command'
 
