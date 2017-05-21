@@ -3,10 +3,10 @@
 newton    pxe_mac=38:2c:4a:73:cd:a3 ansible_host=192.168.4.110 ansible_user=root
 
 [zygotes]
-shoggoth ansible_user=root ansible_python_interpreter=/usr/bin/python2 ansible_service_mgr=systemd
-debiantest ansible_user=root ansible_host=192.168.4.112
+shoggoth ansible_user=zygote ansible_python_interpreter=/usr/bin/python2 ansible_service_mgr=systemd
+debiantest ansible_user=zygote ansible_host=192.168.4.112
 
 [virtual_machines]
 minmay  ansible_user=root
-win11test 
-debiantest ansible_host=192.168.4.112
+win11test
+debiantest ansible_user=root ansible_host=192.168.4.112
