@@ -6,13 +6,17 @@
 
 - name: Get ID of the provisioning network
   delegate_to: "{{ esxi_config.host }}"
-  shell: "grep -F '.networkName = \"VM Network\"' /vmfs/volumes/{{ esxi_config.vm.datastore }}/{{ esxi_config.vm.name }}/{{ esxi_config.vm.name }}.vmx | awk -F . '{ print $1; }'"
+  shell: "grep -F '.networkName = \"{{ esxi_config.vm.prov_network }}\"' /vmfs/volumes/{{ esxi_config.vm.datastore }}/{{ esxi_config.vm.name }}/{{ esxi_config.vm.name }}.vmx | awk -F . '{ print $1; }'"
   register: prov_network_id
 
 - name: Get the MAC of the provisioning network
   delegate_to: "{{ esxi_config.host }}"
   shell: "grep -F '{{ prov_network_id.stdout }}.generatedAddress = \"' /vmfs/volumes/{{ esxi_config.vm.datastore }}/{{ esxi_config.vm.name }}/{{ esxi_config.vm.name }}.vmx | awk -F = '{ print $2; }' | sed -e 's/[ \"]//g'"
   register: provision_network_mac
+
+# FIXME: This assumes that ethernet<n> interfaces in vmx will match one-to-one to eth<n> when the installer boots
+- set_fact:
+    install_iface: "eth{{ prov_network_id.stdout | replace('ethernet', '') }}"
 
 - set_fact: pxe_mac="{{ provision_network_mac.stdout }}"
 
@@ -54,8 +58,21 @@
   with_fileglob:
     - "{{ imageconfig.store_skel_dir }}/*"
 
+- name: Make a temporary directory for prov dir
+  delegate_to: localhost
+  tempfile:
+    state: directory
+    prefix: "zygote-{{ origin_zygote }}-host-{{ inventory_hostname }}-prov-{{ prov_id.stdout }}"
+  register: local_prov_dir
+
+- shell: "find {{ store_prov_dir }} -type f"
+  register: files_to_copy
+
+- fetch: src="{{ item }}" dest="{{ local_prov_dir.path }}/"
+  with_items: "{{ files_to_copy.stdout_lines }}"
+
 - template:
-    src: "{{ store_prov_dir }}/boot/pxelinux.cfg.j2"
+    src: "{{ local_prov_dir.path }}/{{ inventory_hostname }}/{{ store_prov_dir }}/boot/pxelinux.cfg.j2"
     dest: "{{ store_prov_dir }}/boot/pxelinux.cfg"
 
 - template: src=preseed.j2 dest="{{ store_prov_dir }}/boot/preseed"
