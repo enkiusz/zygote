@@ -28,15 +28,22 @@ esxi_config:
     ifaces:
       - name: lan
         plug_into: VM Network
+      - name: sublan
+        plug_into: VMs
 
+    # This should be the name of the network from the hash above where a zygote is connected
+    prov_network: VM Network
 
 zygote_network:
-  interface: eth0
+  interface: eth1
   address:
-    ipv4: 192.168.4.112/24
+    ipv4: 192.168.10.5/24
   dhcp_server:
-    ipv4_range_begin: 192.168.4.160
-    ipv4_range_end: 192.168.4.180
+    ipv4_range_begin: 192.168.10.100
+    ipv4_range_end: 192.168.10.120
+
+  # Setup IPv4 forwarding, needed when this zygote will be a router for other zygotes
+  ipv4_forwarding: true
 
 zygote_store:
   http_baseurl: http://{{ zygote_network.address.ipv4 | ipaddr('address') }}
