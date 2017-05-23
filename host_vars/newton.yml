@@ -89,8 +89,8 @@ esxi_config:
   networking:
     switches:
       - name: TB
-        uplinks:
-          - name: vmnic1
+        # uplinks:
+        #   - name: vmnic1
         portgroups:
           - name: VMs
 
