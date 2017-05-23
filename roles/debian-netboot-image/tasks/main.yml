@@ -16,7 +16,7 @@
   replace: path="{{ store_skel_dir }}/pxelinux.cfg.j2" regexp="timeout 0" replace="timeout 1"
 
 - name: Rewrite debian pxelinux.cfg to boot the automated installer
-  replace: path="{{ store_skel_dir }}/pxelinux.cfg.j2" regexp="default .+" replace='default auto url={{ "{{" }} kickstart_url {{ "}}" }}'
+  replace: path="{{ store_skel_dir }}/pxelinux.cfg.j2" regexp="default .+" replace='default auto {{ "{{" }} "interface=%s" % install_iface if install_iface is defined {{ "}}" }} url={{ "{{" }} kickstart_url {{ "}}" }}'
 
 - name: Build image desriptor
   set_fact:
