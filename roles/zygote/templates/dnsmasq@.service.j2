@@ -6,7 +6,7 @@ After=network.target
 [Service]
 Type=simple
 ExecStartPre=/usr/sbin/dnsmasq --test
-ExecStart=/usr/sbin/dnsmasq -k --user=dnsmasq --group=dnsmasq -C {{ zygote_config.config_root }}/dnsmasq-%i.conf
+ExecStart=/usr/sbin/dnsmasq -k --user=dnsmasq -C {{ zygote_config.config_root }}/dnsmasq-%i.conf
 ExecReload=/bin/kill -HUP $MAINPID
 
 [Install]
