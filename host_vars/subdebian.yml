@@ -1,0 +1,33 @@
+---
+origin_zygote: debiantest
+
+netboot_image_path: images/debian-jessie-netboot
+
+esxi_config:
+
+  host: newton
+
+  vm:
+    auth:
+      users:
+        - userid: root
+          password_hash: "{{ admin_root_password | password_hash('sha512') }}"
+          authorized_keys: "{{ admin_ssh_keys }}"
+          ssh_dir: /root/.ssh/
+
+    name: subdebian
+    display_name: subdebian
+
+    datastore: datastore1
+    vcpus: 1
+    ramsize_mb: 2048
+    disks:
+      - name: state
+        size_gb: 16
+
+    ifaces:
+      - name: sublan
+        plug_into: VMs
+
+    # This should be the name of the network from the hash above where a zygote is connected
+    prov_network: VMs

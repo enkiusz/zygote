@@ -10,3 +10,4 @@ debiantest ansible_user=zygote ansible_host=192.168.4.112
 minmay  ansible_user=root
 win11test
 debiantest ansible_user=root ansible_host=192.168.4.112
+subdebian ansible_user=root ansible_host=192.168.10.100
