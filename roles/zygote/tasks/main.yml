@@ -56,15 +56,23 @@
 - name: Enable nginx site
   file: path=/etc/nginx/sites-enabled/zygote_site.conf src=/etc/nginx/sites-available/zygote_site.conf state=link
 
-- name: Reload nginx
-  service: name=nginx state=reloaded
-
 - name: Configuring interface address
   command: "ip a replace {{ zygote_network.address.ipv4 }} dev {{ zygote_network.interface }}"
 
 - name: Up interface
   command: "ip l set up dev {{ zygote_network.interface }}"
 
+- name: Enable IPv4 forwarding
+  sysctl: name=net.ipv4.ip_forward value=1 state=present
+  when: zygote_network.ipv4_forwarding == true
+
+# This is needed because the default dnsmasq on debian listens on *:53 preventind us from starting
+- name: Disable builtin dnsmasq
+  service: name='dnsmasq.service' enabled=no state=stopped
+  when: ansible_os_family == "Debian"
+
 - name: Start dnsmasq
   service: name='dnsmasq@{{ zygote_network.interface }}.service' enabled=yes state=restarted
 
+- name: Make sure nginx is restarted and enabled
+  service: name=nginx enabled=yes state=restarted
