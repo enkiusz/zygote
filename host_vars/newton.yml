@@ -101,4 +101,4 @@ esxi_config:
     proto: dhcp
 
   licensing:
-    serialnum: esxi_serial_number
+    serialnum: "{{ esxi_serial_number }}"
