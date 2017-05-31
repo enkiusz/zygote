@@ -7,6 +7,9 @@ zygote_network:
     ipv4_range_begin: 192.168.4.100
     ipv4_range_end: 192.168.4.150
 
+  # Setup IPv4 forwarding, needed when this zygote will be a router for other zygotes
+  ipv4_forwarding: true
+
 zygote_store:
   http_baseurl: http://{{ zygote_network.address.ipv4 | ipaddr('address') }}
   tftproot: /tftproot
