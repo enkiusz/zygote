@@ -1,5 +1,6 @@
 ---
-vault_admin_ssh_keys:
-  - name: <NAME>
-    type: <TYPE> (ssh-rsa|dsa|ecdsa|...)
-    key: <KEY INFO> FROM ~/.ssh/id_rsa.pub
+# Uncomment this and fill in variable
+# vault_admin_ssh_keys:
+#   - name: <NAME>
+#     type: <TYPE> (ssh-rsa|dsa|ecdsa|...)
+#     key: <KEY INFO> FROM ~/.ssh/id_rsa.pub

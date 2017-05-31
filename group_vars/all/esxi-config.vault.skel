@@ -1,2 +1,3 @@
 ---
-vault_esxi_serial_number: <SERIAL NUM>
+# Uncomment this and fill in variable
+# vault_esxi_serial_number: <SERIAL NUM>
