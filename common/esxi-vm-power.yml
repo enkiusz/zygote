@@ -1,0 +1,19 @@
+---
+- name: Check VM id
+  shell: "vim-cmd vmsvc/getallvms | grep -F '{{ esxi_config.vm.display_name }}' | awk '{print $1;}'"
+  register: vmlist_out
+
+- name: Get VM state
+  delegate_to: "{{ esxi_config.host }}"
+  shell: "vim-cmd vmsvc/get.summary {{ vmlist_out.stdout }}"
+  register: vmstate_out
+
+- name: Reboot virtual machine
+  delegate_to: "{{ esxi_config.host }}"
+  command: "vim-cmd vmsvc/power.reset {{ vmlist_out.stdout }}"
+  when: vmstate_out.stdout.find('powerState = "poweredOn"') != -1
+
+- name: Power on virtual machine
+  delegate_to: "{{ esxi_config.host }}"
+  command: "vim-cmd vmsvc/power.on {{ vmlist_out.stdout }}"
+  when: vmstate_out.stdout.find('powerState = "poweredOff"') != -1

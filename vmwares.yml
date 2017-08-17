@@ -8,7 +8,7 @@
   gather_facts: False
 
   roles:
-    - { role: provision-esxi, delegate_to: "{{ origin_zygote }}", ansible_user: "{{ hostvars[origin_zygote].zygote_config.user }}", when: provision }
+    - { role: provision-esxi, delegate_to: "{{ origin_zygote }}", when: provision }
 
 - hosts: vmwares
 
@@ -16,5 +16,6 @@
     - esxi-datastores
     - esxi-directories
     - esxi-scratchspace
-    - esxi-networking
-    - ovftool
+    # - esxi-networking
+    # - ovftool
+
