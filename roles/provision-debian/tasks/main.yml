@@ -1,25 +1,4 @@
 ---
-- name: Find virtual machine ID
-  delegate_to: "{{ esxi_config.host }}"
-  shell: "vim-cmd vmsvc/getallvms | grep -F '{{ esxi_config.vm.display_name }}' | awk '{print $1;}'"
-  register: vmlist_out
-
-- name: Get ID of the provisioning network
-  delegate_to: "{{ esxi_config.host }}"
-  shell: "grep -F '.networkName = \"{{ esxi_config.vm.prov_network }}\"' /vmfs/volumes/{{ esxi_config.vm.datastore }}/{{ esxi_config.vm.name }}/{{ esxi_config.vm.name }}.vmx | awk -F . '{ print $1; }'"
-  register: prov_network_id
-
-- name: Get the MAC of the provisioning network
-  delegate_to: "{{ esxi_config.host }}"
-  shell: "grep -F '{{ prov_network_id.stdout }}.generatedAddress = \"' /vmfs/volumes/{{ esxi_config.vm.datastore }}/{{ esxi_config.vm.name }}/{{ esxi_config.vm.name }}.vmx | awk -F = '{ print $2; }' | sed -e 's/[ \"]//g'"
-  register: provision_network_mac
-
-# FIXME: This assumes that ethernet<n> interfaces in vmx will match one-to-one to eth<n> when the installer boots
-- set_fact:
-    install_iface: "eth{{ prov_network_id.stdout | replace('ethernet', '') }}"
-
-- set_fact: pxe_mac="{{ provision_network_mac.stdout }}"
-
 - name: Make a boot ID
   command: "pwgen -s -1 16"
   run_once: True
@@ -71,32 +50,28 @@
 - fetch: src="{{ item }}" dest="{{ local_prov_dir.path }}/"
   with_items: "{{ files_to_copy.stdout_lines }}"
 
-- template:
+- name: Build pxelinux.cfg
+  template:
     src: "{{ local_prov_dir.path }}/{{ inventory_hostname }}/{{ store_prov_dir }}/boot/pxelinux.cfg.j2"
     dest: "{{ store_prov_dir }}/boot/pxelinux.cfg"
 
-- template: src=preseed.j2 dest="{{ store_prov_dir }}/boot/preseed"
-- template: src=late_command.j2 dest="{{ store_prov_dir }}/boot/late_command"
-- template: src=prov-bootoptions.conf.j2 dest="{{ zygote_config.config_root }}/dnsmasq-{{ zygote_network.interface }}.conf.d/boot-{{ prov_id.stdout }}-options.conf"
-- template: src=prov-hostoptions.conf.j2 dest="{{ zygote_config.config_root }}/hosts-{{ zygote_network.interface }}.d/host-{{ inventory_hostname }}.conf"
+- name: Build preseed
+  template: src=preseed.j2 dest="{{ store_prov_dir }}/boot/preseed"
+
+- name: Build late_command
+  template: src=late_command.j2 dest="{{ store_prov_dir }}/boot/late_command"
+
+- name: Build dnsmasq boot options config
+  template: src=prov-bootoptions.conf.j2 dest="{{ zygote_config.config_root }}/dnsmasq-{{ zygote_network.interface }}.conf.d/boot-{{ prov_id.stdout }}-options.conf"
+
+- name: Build dnsmasq host file
+  template: src=prov-hostoptions.conf.j2 dest="{{ zygote_config.config_root }}/hosts-{{ zygote_network.interface }}.d/host-{{ inventory_hostname }}.conf"
 
 - name: Restart dnsmasq services
   command: "sudo systemctl restart dnsmasq@{{ zygote_network.interface}}.service"
 
-- name: Get VM state
-  delegate_to: "{{ esxi_config.host }}"
-  shell: "vim-cmd vmsvc/get.summary {{ vmlist_out.stdout }}"
-  register: vmstate_out
-
-- name: Reboot virtual machine
-  delegate_to: "{{ esxi_config.host }}"
-  command: "vim-cmd vmsvc/power.reset {{ vmlist_out.stdout }}"
-  when: vmstate_out.stdout.find('powerState = "poweredOn"') != -1
-
-- name: Power on virtual machine
-  delegate_to: "{{ esxi_config.host }}"
-  command: "vim-cmd vmsvc/power.on {{ vmlist_out.stdout }}"
-  when: vmstate_out.stdout.find('powerState = "poweredOff"') != -1
+# Power on hardware
+- include: "{{ power_ctrl_task }}"
 
 - name: "Wait for preseed/late-command to finish for prov id {{ prov_id.stdout }}"
   wait_for:
@@ -107,16 +82,19 @@
 - name: Cleanup prov "{{ prov_id.stdout }}"
   file:
     state: absent
-    path:
-      - "{{ zygote_config.config_root }}/dnsmasq-{{ zygote_network.interface }}.conf.d/boot-{{ prov_id.stdout }}-options.conf"
-      - "{{ zygote_config.config_root }}/hosts-{{ zygote_network.interface }}.d/host-{{ inventory_hostname }}.conf"
-      - "{{ store_prov_dir }}"
+    path: "{{ item }}"
+  with_items:
+    - "{{ zygote_config.config_root }}/dnsmasq-{{ zygote_network.interface }}.conf.d/boot-{{ prov_id.stdout }}-options.conf"
+    - "{{ zygote_config.config_root }}/hosts-{{ zygote_network.interface }}.d/host-{{ inventory_hostname }}.conf"
+    - "{{ store_prov_dir }}"
 
 - name: Restart dnsmasq services
   command: "sudo systemctl restart dnsmasq@{{ zygote_network.interface}}.service"
 
+# We don't use wait_for_connection as we don't yet have an SSH host key at this point
+# and the wait_for_connection module would never finish
 - name: Wait for SSH
-  wait_for_connection: delay=30 timeout=600
+  wait_for: host="{{ ansible_host }}" port=22 delay=30 timeout=600 state=started
 
 - name: Fetch the SSH server key
   delegate_to: localhost
@@ -127,5 +105,3 @@
   delegate_to: localhost
   known_hosts: name="{{ ansible_host }}" key="{{ ssh_key.stdout }}"
 
-- name: Collect facts
-  setup:
