@@ -51,4 +51,27 @@
   command: "vim-cmd vmsvc/power.off {{ vmlist_out.stdout }}"
   when: vmaddr_out.stdout == ''
 
+#
+# Set the prov network as a fact
+#
+- name: Find virtual machine ID
+  delegate_to: "{{ esxi_config.host }}"
+  shell: "vim-cmd vmsvc/getallvms | grep -F '{{ esxi_config.vm.display_name }}' | awk '{print $1;}'"
+  register: vmlist_out
+
+- name: Get ID of the provisioning network
+  delegate_to: "{{ esxi_config.host }}"
+  shell: "grep -F '.networkName = \"{{ esxi_config.vm.prov_network }}\"' /vmfs/volumes/{{ esxi_config.vm.datastore }}/{{ esxi_config.vm.name }}/{{ esxi_config.vm.name }}.vmx | awk -F . '{ print $1; }'"
+  register: prov_network_id
+
+- name: Get the MAC of the provisioning network
+  delegate_to: "{{ esxi_config.host }}"
+  shell: "grep -F '{{ prov_network_id.stdout }}.generatedAddress = \"' /vmfs/volumes/{{ esxi_config.vm.datastore }}/{{ esxi_config.vm.name }}/{{ esxi_config.vm.name }}.vmx | awk -F = '{ print $2; }' | sed -e 's/[ \"]//g'"
+  register: provision_network_mac
+
+# FIXME: This assumes that ethernet<n> interfaces in vmx will match one-to-one to eth<n> when the installer boots
+- set_fact:
+    install_iface: "eth{{ prov_network_id.stdout | replace('ethernet', '') }}"
+
+- set_fact: pxe_mac="{{ provision_network_mac.stdout }}"
 
