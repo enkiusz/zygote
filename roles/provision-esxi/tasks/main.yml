@@ -6,6 +6,7 @@
 
 - name: Get origin zygote vars
   set_fact:
+    zygote_config="{{ hostvars[origin_zygote].zygote_config }}"
     zygote_store="{{ hostvars[origin_zygote].zygote_store }}"
     zygote_network="{{ hostvars[origin_zygote].zygote_network }}"
 
@@ -13,9 +14,6 @@
   include_vars:
     name: imageconfig
     file: "{{ zygote_store.tftproot }}/{{ esxi_image_path }}/imageconfig.yml"
-
-- name: Hack, dont know why the imageconfig gets created in hostvars[origin_zygote]
-  set_fact: imageconfig="{{ hostvars[origin_zygote].imageconfig }}"
 
 - name: Set prov directories
   set_fact:
@@ -59,10 +57,8 @@
 - name: Restart dnsmasq services
   command: "sudo systemctl restart dnsmasq@{{ zygote_network.interface}}.service"
 
-# Here is where the machine should be booted up!!!
-# This is a manual step
-- name: Prompt for boot
-  pause: prompt="Boot {{ ansible_host }} and press Enter to continue"
+# Power on hardware
+- include: "{{ power_ctrl_task }}"
 
 - name: Wait until the installer ends
   wait_for: path="{{ store_prov_dir }}/state/post-install" state=present delay=30 timeout=600
@@ -71,16 +67,23 @@
 - name: Cleanup prov "{{ prov_id.stdout }}"
   file:
     state: absent
-    path:
-      - "{{ zygote_config.config_root }}/dnsmasq-{{ zygote_network.interface }}.conf.d/boot-{{ prov_id.stdout }}-options.conf"
-      - "{{ zygote_config.config_root }}/hosts-{{ zygote_network.interface }}.d/host-{{ ansible_host }}.conf"
-      - "{{ store_prov_dir }}"
+    path: "{{ item }}"
+  with_items:
+    - "{{ zygote_config.config_root }}/dnsmasq-{{ zygote_network.interface }}.conf.d/boot-{{ prov_id.stdout }}-options.conf"
+    - "{{ zygote_config.config_root }}/hosts-{{ zygote_network.interface }}.d/host-{{ ansible_host }}.conf"
+    - "{{ store_prov_dir }}"
 
 - name: Restart dnsmasq services
   command: "sudo systemctl restart dnsmasq@{{ zygote_network.interface}}.service"
 
+# We don't use wait_for_connection as we don't yet have an SSH host key at this point
+# and the wait_for_connection module would never finish
 - name: Wait for SSH
-  wait_for_connection: delay=30 timeout=600
+  wait_for: host="{{ ansible_host }}" port=22 delay=30 timeout=600 state=started
+
+- name: Purge old SSH keys
+  delegate_to: localhost
+  known_hosts: state=absent name="{{ ansible_host }}"
 
 - name: Fetch the SSH server key
   delegate_to: localhost
@@ -91,5 +94,3 @@
   delegate_to: localhost
   known_hosts: name="{{ ansible_host }}" key="{{ ssh_key.stdout }}"
 
-- name: Collect facts
-  setup:
