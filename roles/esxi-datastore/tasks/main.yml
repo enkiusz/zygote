@@ -1,15 +1,19 @@
 ---
+- name: Check partition state
+  command: "partedUtil getptbl /dev/disks/{{ datastore.device_uuid }}"
+  register: ptbl_out
+
+- name: Create label
+  command: "partedUtil mklabel /dev/disks/{{ datastore.device_uuid }} gpt"
+  when: ptbl_out.stdout_lines[0] != 'gpt'
+
 - name: Get device size
   shell: "partedUtil getUsableSectors /dev/disks/{{ datastore.device_uuid }} | awk '{ print $2; }'"
   register: usable_sectors_out
 
-- name: Check if partition exists
-  command: "partedUtil getptbl /dev/disks/{{ datastore.device_uuid }}"
-  register: ptbl_out
-
 - name: Create partition
   command: "partedUtil setptbl /dev/disks/{{ datastore.device_uuid }} gpt '1 2048 {{ usable_sectors_out.stdout }} {{ vmfs_partition_guid }} 0'"
-  when: ptbl_out.stdout.find('1 2048 {{ usable_sectors_out.stdout }} {{ vmfs_partition_guid }} vmfs 0') == -1
+  when: ptbl_out.stdout_lines[2].find('1 2048 {{ usable_sectors_out.stdout }} {{ vmfs_partition_guid }} vmfs 0') == -1
 
 - name: Create filesystem
   command: "vmkfstools -C vmfs6 -S {{ datastore.name }} /dev/disks/{{ datastore.device_uuid }}:1"
