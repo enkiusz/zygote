@@ -2,4 +2,4 @@
 - include: zygotes.yml
 - include: vmwares.yml
 - include: virtual-machines.yml
-
+- include: whitestars.yml

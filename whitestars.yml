@@ -1,0 +1,18 @@
+---
+- hosts: whitestars
+
+  vars:
+    provision: false
+
+  # For provisioning only, gathering facts doesn't work until the host is provisioned
+  gather_facts: False
+
+  roles:
+    - { role: provision-debian, delegate_to: "{{ origin_zygote }}", when: provision }
+
+
+- hosts: whitestars
+
+  roles:
+    - { role: whitestar, when: ansible_os_family == "Debian" }
+
