@@ -5,8 +5,11 @@ accepteula
 rootpw --iscrypted {{ esxi_config.auth.users | json_query("[?userid=='root'].password_hash") | first }}  
 
 clearpart --firstdisk={{ esxi_config.storage.rootdisk.uuid }},{{ esxi_config.storage.rootdisk.type }}
+
 {% for ds in esxi_config.storage.datastores %}
-  clearpart --overwritevmfs --drives={{ ds.device_uuid }}
+  {% if esxi_config.storage.wipe|default(false) == true or ds.wipe|default(false) == true %}
+    clearpart --overwritevmfs --drives={{ ds.device_uuid }}
+  {% endif %}
 {% endfor %}
 
 install --firstdisk={{ esxi_config.storage.rootdisk.uuid }},{{ esxi_config.storage.rootdisk.type }} {{ esxi_config.installer.flags }} 
