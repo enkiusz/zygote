@@ -9,6 +9,22 @@
 - name: Extract netboot archive
   unarchive: src="{{ netboot_archive }}" dest="{{ store_tgt_dir }}"
 
+# Reference: https://wiki.debian.org/DebianInstaller/NetbootFirmware
+- name: Download firmware files image
+  get_url: url=http://cdimage.debian.org/cdimage/unofficial/non-free/firmware/stable/current/firmware.cpio.gz dest="{{ store_tgt_dir }}"
+
+- name: Look for initramfs images
+  find: paths="{{ store_tgt_dir }}" patterns="initrd.gz" recurse=yes
+  register: initrds
+
+- name: Move the original initramfs image aside
+  command: "mv {{ item.path }} {{ item.path }}.orig"
+  with_items: "{{ initrds.files }}"
+
+- name: Append the firmware image to the initramfs
+  shell: "cat {{ item.path }}.orig {{ store_tgt_dir }}/firmware.cpio.gz > {{ item.path }}"
+  with_items: "{{ initrds.files }}"
+
 - name: Create skel pxelinux.cfg
   copy: src="{{ store_tgt_dir }}/pxelinux.cfg/default" dest="{{ store_skel_dir }}/pxelinux.cfg.j2"
 
@@ -16,7 +32,7 @@
   replace: path="{{ store_skel_dir }}/pxelinux.cfg.j2" regexp="timeout 0" replace="timeout 1"
 
 - name: Rewrite debian pxelinux.cfg to boot the automated installer
-  replace: path="{{ store_skel_dir }}/pxelinux.cfg.j2" regexp="default .+" replace='default auto {{ "{{" }} "interface=%s" % install_iface if install_iface is defined {{ "}}" }} url={{ "{{" }} kickstart_url {{ "}}" }}'
+  replace: path="{{ store_skel_dir }}/pxelinux.cfg.j2" regexp="default .+" replace='default auto {{ "{{" }} "interface=%s" % install_iface if install_iface is defined else "" {{ "}}" }} url={{ "{{" }} kickstart_url {{ "}}" }}'
 
 - name: Build image desriptor
   set_fact:
