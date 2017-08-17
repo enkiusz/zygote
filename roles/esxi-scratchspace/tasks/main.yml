@@ -3,10 +3,12 @@
   file: path="{{ scratch_path }}" state=directory
 
 - name: Check if persistent scratchspace is set
-  shell: "vim-cmd hostsvc/advopt/view ScratchConfig.ConfiguredScratchLocation 2>&1 | egrep 'value = \".+\"'"
+  shell: 'vim-cmd hostsvc/advopt/view ScratchConfig.ConfiguredScratchLocation 2>&1 | grep "value = \"$(readlink -f {{ scratch_path }})\""'
   register: scratchspace_check_out
+  # We can ignore errors here as they are returned by grep when the scratchspace is not set yet
+  ignore_errors: True
 
-- name: Set the scratch space parameterp
+- name: Set the scratch space parameter
   command: "vim-cmd hostsvc/advopt/update ScratchConfig.ConfiguredScratchLocation string {{ scratch_path }}"
   when: scratchspace_check_out.stdout == ""
 
@@ -16,3 +18,8 @@
 
 - name: Wait for SSH
   wait_for_connection: delay=10 timeout=600
+  when: scratchspace_check_out.stdout == ""
+
+
+
+
