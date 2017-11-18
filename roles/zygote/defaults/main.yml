@@ -1,5 +1,8 @@
 ---
 zygote_config:
   user: zygote
+  groups:
+    - ssh-user
   config_root: /etc/zygote
   systemd_unit_root: /etc/systemd/system
+  
