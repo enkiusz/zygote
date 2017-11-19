@@ -1,3 +1,4 @@
 ---
 dependencies:
+  - ssh_common
   - nginx
