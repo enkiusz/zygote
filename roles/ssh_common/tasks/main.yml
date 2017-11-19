@@ -5,6 +5,9 @@
 - name: "Add root to {{ ssh_access_group }} group"
   user: append=yes name=root groups="{{ ssh_access_group }}"
 
+- name: "Add {{ ansible_user }} to {{ ssh_access_group }} group"
+  user: append=yes name="{{ ansible_user }}" groups="{{ ssh_access_group }}"
+
 - name: "Allow only users belonging to {{ ssh_access_group }}"
   lineinfile: state=present line="AllowGroups {{ ssh_access_group }}" path=/etc/ssh/sshd_config
 
