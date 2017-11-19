@@ -1,104 +1,20 @@
 ---
-hardware:
-  mac_address: 38:2c:4a:73:cd:a3
+zygote_network:
+  interface: tadpole
+  address:
+    ipv4: 192.168.4.2/24
+  dhcp_server:
+    ipv4_range_begin: 192.168.4.100
+    ipv4_range_end: 192.168.4.150
 
-origin_zygote: shoggoth
+  # Setup IPv4 forwarding, needed when this zygote will be a router for other zygotes
+  ipv4_forwarding: true
 
-# Inside tftproot
-esxi_image_path: "images/VMware-VMvisor-Installer-201701001-4887370.x86_64"
+zygote_store:
+  http_baseurl: http://{{ zygote_network.address.ipv4 | ipaddr('address') }}
+  tftproot: /tftproot
 
-# The default datastore
-datastore_name: datastore1
-datastore_path: "/vmfs/volumes/{{ datastore_name }}"
-iso_store: "{{ datastore_path }}/iso"
-ova_store: "{{ datastore_path }}/ova"
-tools_store: "{{ datastore_path }}/tools"
-
-esxi_config:
-  auth:
-    users:
-      - userid: root
-        password_hash: "{{ admin_root_password | password_hash('sha512') }}"
-        authorized_keys: "{{ admin_ssh_keys }}"
-
-  storage:
-
-    datastores:
-      - name: datastore1
-        # Local ATA Disk (t10.ATA_____ST31000524AS________________________________________6VPK5J2Z)
-        device_uuid: vml.01000000002020202020202020202020203656504b354a325a535433313030
-
-      - name: datastore2
-        # Local ATA Disk (t10.ATA_____HITACHI_HUA722010ALA330_________________N12KATJL____________)
-        device_uuid: vml.01000000004e31324b41544a4c202020202020202020202020484954414348
-
-
-      - name: datastore3
-        # Local ATA Disk (t10.ATA_____ST1000DM0032D1CH162__________________________________Z1D2XB6H)
-        device_uuid: vml.01000000002020202020202020202020205a31443258423648535431303030
-
-
-      - name: datastore4
-        # Local ATA Disk (t10.ATA_____SAMSUNG_HD154UI_________________________S1Y6J1LS706055______)
-        device_uuid: vml.0100000000533159364a314c5337303630353520202020202053414d53554e
-
-
-    passthrough:
-      - name: tank0
-        target_datastore: datastore1
-        # Local ATA Disk (t10.ATA_____TOSHIBA_DT01ACA300_________________________________Z5RS759KS)
-        device_uuid: vml.010000000020202020202020202020205a3552533735394b53544f53484942
-
-      - name: tank1
-        target_datastore: datastore1
-        # Local ATA Disk (t10.ATA_____ST3000DM0012D1ER166__________________________________Z502VF4T)
-        device_uuid: vml.01000000002020202020202020202020205a35303256463454535433303030
-
-      - name: tank2
-        target_datastore: datastore1
-        # Local ATA Disk (t10.ATA_____TOSHIBA_DT01ACA300_________________________________Z5RSBD8KS)
-        device_uuid: vml.010000000020202020202020202020205a3552534244384b53544f53484942
-
-      - name: tank3
-        target_datastore: datastore1
-        # Local ATA Disk (t10.ATA_____ST3000DM0012D1ER166__________________________________Z502VCJD)
-        device_uuid: vml.01000000002020202020202020202020205a35303256434a44535433303030
-
-    rootdisk:
-      # Check for device name using:
-      # esxcli storage core device list
-      #
-      # mpx.vmhba32:C0:T0:L0
-      # Display Name: Local USB Direct-Access (mpx.vmhba32:C0:T0:L0)
-      # Has Settable Display Name: false
-      # Size: 3736
-      # Device Type: Direct-Access 
-      # Multipath Plugin: NMP
-      # Devfs Path: /vmfs/devices/disks/mpx.vmhba32:C0:T0:L0
-      # Vendor: Kingston
-      # Model: DT 100 G2       
-      # Revision: 0100
-      # SCSI Level: 2
-      # Is Pseudo: false
-      # Status: on
-      # [...]
-      # Other UIDs: vml.0000000000766d68626133323a303a30
-      uuid: vml.0000000000766d68626133323a303a30
-      type: usb
-
-  networking:
-    switches:
-      - name: TB
-        # uplinks:
-        #   - name: vmnic1
-        portgroups:
-          - name: VMs
-
-  installer:
-    flags: --overwritevmfs
-
-  network:
-    proto: dhcp
-
-  licensing:
-    serialnum: "{{ esxi_serial_number }}"
+  # The user ID under status reporting CGI scripts are running
+  cgi_bin_user: nginx
+  # The state reporting URL
+  report_state_url: http://{{ zygote_network.address.ipv4 | ipaddr('address') }}/cgi-bin/report-state.cgi
