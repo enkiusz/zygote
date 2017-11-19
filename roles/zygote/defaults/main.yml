@@ -5,4 +5,10 @@ zygote_config:
     - ssh-user
   config_root: /etc/zygote
   systemd_unit_root: /etc/systemd/system
-  
+
+zygote_network:
+  interface: node-network
+
+zygote_store:
+  tftproot: /tftproot
+

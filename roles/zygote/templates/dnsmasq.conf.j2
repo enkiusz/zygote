@@ -1,7 +1,7 @@
 {{ ansible_managed | comment }}
 interface={{ zygote_network.interface }}
 bind-interfaces
-dhcp-range={{ zygote_network.dhcp_server.ipv4_range_begin }},{{ zygote_network.dhcp_server.ipv4_range_end }}
+dhcp-range={{ dhcp_server_ipv4_range_begin }},{{ dhcp_server_ipv4_range_end }}
 dhcp-hostsfile={{ zygote_config.config_root }}/hosts-{{ zygote_network.interface }}.d
 conf-dir={{ zygote_config.config_root}}/dnsmasq-{{ zygote_network.interface }}.conf.d
 enable-tftp={{ zygote_network.interface }}
