@@ -2,7 +2,7 @@
 - name: Create user for running zygote
   user:
     name: "{{ zygote_config.user }}"
-    groups: ssh-user
+    groups: "{{ ssh_access_group }}"
 
 - name: Add SSH keys for "{{ zygote_config.user }}"
   authorized_key:
@@ -34,49 +34,49 @@
     - "{{ zygote_config.config_root }}/hosts-{{ zygote_network.interface }}.d"
     - "{{ zygote_config.config_root}}/dnsmasq-{{ zygote_network.interface }}.conf.d"
 
-- name: Install files from templates
-  template: src="{{ item.src }}" dest="{{ item.dest if item.dest is defined else (item.destdir + '/' + (item.src | basename | replace('.j2',''))) }}"
-  with_items:
-    - src: dnsmasq@.service.j2
-      destdir: "{{ zygote_config.systemd_unit_root }}"
-    - src: zygote_site.conf.j2
-      destdir: "/etc/nginx/sites-available"
-    - src: allow-dnsmasq-restart.j2
-      destdir: /etc/sudoers.d
-    - src: dnsmasq.conf.j2
-      dest: "{{ zygote_config.config_root }}/dnsmasq-{{ zygote_network.interface }}.conf"
-    - src: host-index.html
-      dest: "{{ zygote_store.tftproot }}/host/index.html"
-    - src: report-state.cgi.j2
-      destdir: "{{ zygote_store.tftproot }}/cgi-bin"
+# - name: Install files from templates
+#   template: src="{{ item.src }}" dest="{{ item.dest if item.dest is defined else (item.destdir + '/' + (item.src | basename | replace('.j2',''))) }}"
+#   with_items:
+#     - src: dnsmasq@.service.j2
+#       destdir: "{{ zygote_config.systemd_unit_root }}"
+#     - src: zygote_site.conf.j2
+#       destdir: "/etc/nginx/sites-available"
+#     - src: allow-dnsmasq-restart.j2
+#       destdir: /etc/sudoers.d
+#     - src: dnsmasq.conf.j2
+#       dest: "{{ zygote_config.config_root }}/dnsmasq-{{ zygote_network.interface }}.conf"
+#     - src: host-index.html
+#       dest: "{{ zygote_store.tftproot }}/host/index.html"
+#     - src: report-state.cgi.j2
+#       destdir: "{{ zygote_store.tftproot }}/cgi-bin"
 
-- name: Make report-state CGI executable
-  file: path="{{ zygote_store.tftproot }}/cgi-bin/report-state.cgi" state=file mode="0755"
+# - name: Make report-state CGI executable
+#   file: path="{{ zygote_store.tftproot }}/cgi-bin/report-state.cgi" state=file mode="0755"
 
-- name: Enable nginx site
-  file: path=/etc/nginx/sites-enabled/zygote_site.conf src=/etc/nginx/sites-available/zygote_site.conf state=link
+# - name: Enable nginx site
+#   file: path=/etc/nginx/sites-enabled/zygote_site.conf src=/etc/nginx/sites-available/zygote_site.conf state=link
 
-- name: Configuring interface address
-  command: "ip a replace {{ zygote_network.address.ipv4 }} dev {{ zygote_network.interface }}"
+# - name: Configuring interface address
+#   command: "ip a replace {{ zygote_network.address.ipv4 }} dev {{ zygote_network.interface }}"
 
-- name: Up interface
-  command: "ip l set up dev {{ zygote_network.interface }}"
+# - name: Up interface
+#   command: "ip l set up dev {{ zygote_network.interface }}"
 
-- name: Enable IPv4 forwarding
-  sysctl: name=net.ipv4.ip_forward value=1 state=present
-  when: zygote_network.ipv4_forwarding == true
+# - name: Enable IPv4 forwarding
+#   sysctl: name=net.ipv4.ip_forward value=1 state=present
+#   when: zygote_network.ipv4_forwarding == true
 
-# This is needed because the default dnsmasq on debian listens on *:53 preventind us from starting
-- name: Disable builtin dnsmasq
-  service: name='dnsmasq.service' enabled=no state=stopped
-  when: ansible_os_family == "Debian"
+# # This is needed because the default dnsmasq on debian listens on *:53 preventind us from starting
+# - name: Disable builtin dnsmasq
+#   service: name='dnsmasq.service' enabled=no state=stopped
+#   when: ansible_os_family == "Debian"
 
-#
-# TODO: Start apt-cache-ng
-#
+# #
+# # TODO: Start apt-cache-ng
+# #
 
-- name: Start dnsmasq
-  service: name='dnsmasq@{{ zygote_network.interface }}.service' enabled=yes state=restarted
+# - name: Start dnsmasq
+#   service: name='dnsmasq@{{ zygote_network.interface }}.service' enabled=yes state=restarted
 
-- name: Make sure nginx is restarted and enabled
-  service: name=nginx enabled=yes state=restarted
+# - name: Make sure nginx is restarted and enabled
+#   service: name=nginx enabled=yes state=restarted
