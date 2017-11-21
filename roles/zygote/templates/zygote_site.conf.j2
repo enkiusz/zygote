@@ -9,6 +9,18 @@ server {
 
 	server_name {{ inventory_hostname }};
 
+  # Disable keepalive because the wget used by systemrescue's initramfs doesn't 
+  # specify Connection:close but waits for the server to close the connection.
+  # This together with keepalive enabled on nginx results in long wait for the 
+  # file download to finish. Request sent by the iniramfs:
+  #
+  # GET /images/systemrescuecd-x86-4.9.6/sysrcd.md5 HTTP/1.1
+  # Host: 192.168.4.2
+  # User-Agent: Wget
+  #
+  keepalive_requests 0;
+  keepalive_timeout 0;
+
 	location / {
 		# First attempt to serve request as file, then
 		# as directory, then fall back to displaying a 404.
