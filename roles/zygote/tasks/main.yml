@@ -83,3 +83,20 @@
 
 - name: Make sure nginx is restarted and enabled
   service: name=nginx enabled=yes state=restarted
+
+##
+## Store zygote configuration as local facts
+##
+
+- name: Create local facts directory
+  file: state=directory recurse=yes path=/etc/ansible/facts.d
+
+- name: Store zygote configuration as facts
+  copy: dest=/etc/ansible/facts.d/zygote_config.fact content="{{ zygote_config | to_json }}"
+
+- name: Store zygote storage configuration as facts
+  copy: dest=/etc/ansible/facts.d/zygote_store.fact content="{{ zygote_store | to_json }}"
+
+- name: Store zygote network configuration as facts
+  copy: dest=/etc/ansible/facts.d/zygote_network.fact content="{{ zygote_network | to_json }}"
+
