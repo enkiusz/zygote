@@ -1,20 +1,10 @@
 ---
 zygote_network:
   interface: tadpole
-  address:
-    ipv4: 192.168.4.2/24
-  dhcp_server:
-    ipv4_range_begin: 192.168.4.100
-    ipv4_range_end: 192.168.4.150
 
   # Setup IPv4 forwarding, needed when this zygote will be a router for other zygotes
   ipv4_forwarding: true
 
 zygote_store:
-  http_baseurl: http://{{ zygote_network.address.ipv4 | ipaddr('address') }}
   tftproot: /tftproot
 
-  # The user ID under status reporting CGI scripts are running
-  cgi_bin_user: nginx
-  # The state reporting URL
-  report_state_url: http://{{ zygote_network.address.ipv4 | ipaddr('address') }}/cgi-bin/report-state.cgi

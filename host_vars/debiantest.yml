@@ -36,21 +36,9 @@ esxi_config:
 
 zygote_network:
   interface: eth1
-  address:
-    ipv4: 192.168.10.5/24
-  dhcp_server:
-    ipv4_range_begin: 192.168.10.100
-    ipv4_range_end: 192.168.10.120
 
   # Setup IPv4 forwarding, needed when this zygote will be a router for other zygotes
   ipv4_forwarding: true
 
 zygote_store:
-  http_baseurl: http://{{ zygote_network.address.ipv4 | ipaddr('address') }}
   tftproot: /tftproot
-
-  # The user ID under status reporting CGI scripts are running
-  cgi_bin_user: www-data
-  # The state reporting URL
-  report_state_url: http://{{ zygote_network.address.ipv4 | ipaddr('address') }}/cgi-bin/report-state.cgi
-
