@@ -31,7 +31,7 @@ server {
 location /cgi-bin/ {
 gzip off;
 root {{ zygote_store.tftproot }};
-fastcgi_pass unix:/run/fcgiwrap.socket;
+fastcgi_pass unix:/run/fcgiwrap-zygote.socket;
 include /etc/nginx/fastcgi_params;
 fastcgi_param SCRIPT_FILENAME {{ zygote_store.tftproot }}$fastcgi_script_name;
 }

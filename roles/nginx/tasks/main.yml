@@ -5,21 +5,10 @@
       - nginx
       - fcgiwrap
 
-- service: name='nginx' enabled=yes state=started
-
-# BIG FAT WARNING!!!
-# cgi-bin scripts run as root user in this default configuration!
-# This is a security risk!
-#
-# TODO: Make fcgiwrap run as a non-root user
-# Either using spawn-fcgi or systemd native functionality
-# (https://redmine.lighttpd.net/projects/spawn-fcgi/wiki/Systemd)
-- service: name='fcgiwrap.socket' enabled=yes state=started
-    
 - include_role: name=nginx tasks_from=gentoo
   when: ansible_os_family == "Gentoo"
 
-- file: path=/etc/nginx/sites-enabled/default state=absent
+- name: Disable default site
+  file: path=/etc/nginx/sites-enabled/default state=absent
   notify:
     - reload nginx
-

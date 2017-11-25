@@ -1,9 +1,0 @@
----
-- name: "Copy directory {{ sourcedir }} to zygote image store"
-  copy: src="{{ sourcedir }}" dest="{{ zygote_store.tftproot }}/images"
-  when: sourcedir is defined
-
-- name: "Copy file {{ sourcefile }} to zygote image store"
-  copy: src="{{ sourcefile }}" dest="{{ zygote_store.tftproot }}/images/{{ sourcefile | replace('.iso','') }}"
-  when: sourcefile is defined
-

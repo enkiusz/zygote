@@ -5,6 +5,7 @@ zygote_config:
     - ssh-user
   config_root: /etc/zygote
   systemd_unit_root: /etc/systemd/system
+  dnsmasq_user: dnsmasq
 
 zygote_network:
   interface: node-network

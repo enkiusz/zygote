@@ -4,22 +4,23 @@
   run_once: True
   register: prov_id
 
+- name: Gather facts from origin zygote
+  delegate_to: "{{ origin_zygote }}"
+  setup:
+
 - name: Get origin zygote vars
+  delegate_to: "{{ origin_zygote }}"
   set_fact:
-    zygote_config="{{ hostvars[origin_zygote].zygote_config }}"
-    zygote_store="{{ hostvars[origin_zygote].zygote_store }}"
-    zygote_network="{{ hostvars[origin_zygote].zygote_network }}"
+    zygote_config="{{ ansible_local.zygote_config }}"
+    zygote_store="{{ ansible_local.zygote_store }}"
+    zygote_network="{{ ansible_local.zygote_network }}"
+    imageconfig="{{ ansible_local.zygote_images[image_path | basename] }}"
 
 - set_fact:
     prov_dir: "host/{{ prov_id.stdout }}"
     store_prov_dir: "{{ zygote_store.tftproot }}/host/{{ prov_id.stdout }}"
 
 - set_fact: kickstart_url="{{ zygote_store.http_baseurl }}/{{ prov_dir }}/boot/preseed"
-
-- name: Load image descriptor
-  include_vars:
-    name: imageconfig
-    file: "{{ zygote_store.tftproot }}/{{ netboot_image_path }}/imageconfig.yml"
 
 - name: Create layout for prov "{{ prov_dir }}"
   file: path="{{ item }}" state=directory

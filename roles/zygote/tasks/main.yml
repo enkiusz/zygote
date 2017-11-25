@@ -48,6 +48,10 @@
   with_items:
     - src: dnsmasq@.service.j2
       destdir: "{{ zygote_config.systemd_unit_root }}"
+    - src: fcgiwrap-zygote.socket.j2
+      destdir: "{{ zygote_config.systemd_unit_root }}"
+    - src: fcgiwrap-zygote.service.j2
+      destdir: "{{ zygote_config.systemd_unit_root }}"
     - src: zygote_site.conf.j2
       destdir: "/etc/nginx/sites-available"
     - src: allow-dnsmasq-restart.j2
@@ -84,6 +88,9 @@
 - name: Make sure nginx is restarted and enabled
   service: name=nginx enabled=yes state=restarted
 
+- name: Make sure fcgiwrap is restarted and enabled
+  service: name=fcgiwrap-zygote.socket enabled=yes state=started
+
 ##
 ## Store zygote configuration as local facts
 ##
@@ -91,12 +98,14 @@
 - name: Create local facts directory
   file: state=directory recurse=yes path=/etc/ansible/facts.d
 
-- name: Store zygote configuration as facts
-  copy: dest=/etc/ansible/facts.d/zygote_config.fact content="{{ zygote_config | to_json }}"
+- name: Install local facts from templates
+  template: src="{{ item }}" dest="/etc/ansible/facts.d/{{ item | basename | replace('.j2','') }}"
+  with_items:
+    - zygote_config.fact.j2
+    - zygote_store.fact.j2
+    - zygote_network.fact.j2
+    - zygote_images.fact.j2
 
-- name: Store zygote storage configuration as facts
-  copy: dest=/etc/ansible/facts.d/zygote_store.fact content="{{ zygote_store | to_json }}"
-
-- name: Store zygote network configuration as facts
-  copy: dest=/etc/ansible/facts.d/zygote_network.fact content="{{ zygote_network | to_json }}"
+- name: Make image enumerator fact executable
+  file: path=/etc/ansible/facts.d/zygote_images.fact state=file mode=0755
 

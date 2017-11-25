@@ -80,5 +80,5 @@
       store_skel_dir: "{{ zygote_store.tftproot }}/{{ skel_dir }}"
 
 - name: Dump configuration for this image
-  copy: dest="{{ store_tgt_dir }}/imageconfig.yml" content="{{ imgconfig | to_nice_yaml }}"
+  copy: dest="{{ store_tgt_dir }}/imageconfig.json" content="{{ imgconfig | to_json }}"
 

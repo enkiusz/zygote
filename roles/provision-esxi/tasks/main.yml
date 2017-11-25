@@ -4,16 +4,17 @@
   run_once: True
   register: prov_id
 
-- name: Get origin zygote vars
-  set_fact:
-    zygote_config="{{ hostvars[origin_zygote].zygote_config }}"
-    zygote_store="{{ hostvars[origin_zygote].zygote_store }}"
-    zygote_network="{{ hostvars[origin_zygote].zygote_network }}"
+- name: Gather facts from origin zygote
+  delegate_to: "{{ origin_zygote }}"
+  setup: 
 
-- name: Load image descriptor
-  include_vars:
-    name: imageconfig
-    file: "{{ zygote_store.tftproot }}/{{ esxi_image_path }}/imageconfig.yml"
+- name: Get origin zygote vars
+  delegate_to: "{{ origin_zygote }}"
+  set_fact:
+    zygote_config="{{ ansible_local.zygote_config }}"
+    zygote_store="{{ ansible_local.zygote_store }}"
+    zygote_network="{{ ansible_local.zygote_network }}"
+    imageconfig="{{ ansible_local.zygote_images[image_path | basename] }}"
 
 - name: Set prov directories
   set_fact:
