@@ -1,0 +1,8 @@
+[Unit]
+Description=Zygote fcgiwrap socket
+
+[Socket]
+ListenStream=/run/fcgiwrap-zygote.socket
+
+[Install]
+WantedBy=sockets.target

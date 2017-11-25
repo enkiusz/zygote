@@ -1,0 +1,7 @@
+[Unit]
+Description=Zygote CGI Server
+After=nss-user-lookup.target
+
+[Service]
+ExecStart=/usr/sbin/fcgiwrap
+User={{ zygote_config.user }}
