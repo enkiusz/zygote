@@ -32,7 +32,7 @@
     - "{{ store_prov_dir }}/state"
 
 - name: Add permissions to allow access by state-report.cgi
-  acl: path="{{ store_prov_dir }}/state" etype=user entity="{{ zygote_store.cgi_bin_user }}" permissions=rwx state=present
+  acl: path="{{ store_prov_dir }}/state" etype=user entity="{{ zygote_config.user }}" permissions=rwx state=present
 
 # Build provdir from skel files for the selected pack
 - name: Copy skel files
