@@ -1,0 +1,12 @@
+#!/bin/sh
+
+sshdir=/root/.ssh
+
+mkdir -m 600 -p "$sshdir"
+
+{% for key in admin_ssh_keys %}
+echo "{{ key.type }} {{ key.key }} {{ key.name }}" >> "$sshdir/authorized_keys"
+{% endfor %}
+
+chmod 400 "$sshdir/authorized_keys"
+

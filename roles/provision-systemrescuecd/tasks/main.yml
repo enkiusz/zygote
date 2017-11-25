@@ -1,0 +1,90 @@
+---
+- name: Make a boot ID
+  command: "pwgen -s -1 16"
+  run_once: True
+  register: prov_id
+
+- name: Gather facts from origin zygote
+  delegate_to: "{{ origin_zygote }}"
+  setup: 
+
+- name: Get origin zygote vars
+  delegate_to: "{{ origin_zygote }}"
+  set_fact:
+    zygote_config="{{ ansible_local.zygote_config }}"
+    zygote_store="{{ ansible_local.zygote_store }}"
+    zygote_network="{{ ansible_local.zygote_network }}"
+    imageconfig="{{ ansible_local.zygote_images[image_path | basename] }}"
+
+- set_fact:
+    prov_dir: "host/{{ prov_id.stdout }}"
+    store_prov_dir: "{{ zygote_store.tftproot }}/host/{{ prov_id.stdout }}"
+
+- name: Create layout for prov "{{ prov_dir }}"
+  file: path="{{ item }}" state=directory
+  with_items:
+    - "{{ store_prov_dir }}"
+    - "{{ store_prov_dir }}/boot"
+    - "{{ store_prov_dir }}/state"
+    - "{{ store_prov_dir }}/boot/autorun"
+
+- name: Generate pxelinux.cfg
+  template:
+    src: pxelinux.cfg.j2
+    dest: "{{ store_prov_dir }}/boot/pxelinux.cfg"
+
+- name: Generate autorun script for SSH key setup
+  template:
+    src: "autorun/{{ item }}"
+    dest: "{{ store_prov_dir }}/boot/autorun/{{ item | splitext | first }}"
+  with_items:
+    - autorun1.j2
+    - autorun2.j2
+    - autorun9.j2
+
+- name: Add permissions to allow access by state-report.cgi
+  acl: path="{{ store_prov_dir }}/state" etype=user entity="{{ zygote_config.user }}" permissions=rwx state=present
+
+- name: Build dnsmasq boot options config
+  template: src=prov-bootoptions.conf.j2 dest="{{ zygote_config.config_root }}/dnsmasq-{{ zygote_network.interface }}.conf.d/boot-{{ prov_id.stdout }}-options.conf"
+
+- name: Build dnsmasq host file
+  template: src=prov-hostoptions.conf.j2 dest="{{ zygote_config.config_root }}/hosts-{{ zygote_network.interface }}.d/host-{{ inventory_hostname }}.conf"
+
+- name: Restart dnsmasq services
+  command: "sudo systemctl restart dnsmasq@{{ zygote_network.interface}}.service"
+
+# Power on hardware
+- include: "{{ power_ctrl_task }}"
+
+- name: "Wait for booting to finish for prov id {{ prov_id.stdout }}"
+  wait_for:
+    path: "{{ store_prov_dir }}/state/boot-complete"
+    timeout: 6000
+
+# Booting has finished
+- name: Cleanup prov "{{ prov_id.stdout }}"
+  file:
+    state: absent
+    path: "{{ item }}"
+  with_items:
+    - "{{ zygote_config.config_root }}/dnsmasq-{{ zygote_network.interface }}.conf.d/boot-{{ prov_id.stdout }}-options.conf"
+    - "{{ zygote_config.config_root }}/hosts-{{ zygote_network.interface }}.d/host-{{ inventory_hostname }}.conf"
+    - "{{ store_prov_dir }}"
+
+- name: Restart dnsmasq services
+  command: "sudo systemctl restart dnsmasq@{{ zygote_network.interface}}.service"
+
+# We don't use wait_for_connection as we don't yet have an SSH host key at this point
+# and the wait_for_connection module would never finish
+- name: Wait for SSH
+  wait_for: host="{{ ansible_host }}" port=22 timeout=600 state=started
+
+- name: Fetch the SSH server key
+  delegate_to: localhost
+  command: "ssh-keyscan {{ ansible_host }}"
+  register: ssh_key
+
+- name: Remember SSH key
+  delegate_to: localhost
+  known_hosts: name="{{ ansible_host }}" key="{{ ssh_key.stdout }}"
