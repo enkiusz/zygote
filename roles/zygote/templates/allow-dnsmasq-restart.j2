@@ -1,2 +1,3 @@
 {{ ansible_managed | comment }}
 {{ zygote_config.user }} ALL = NOPASSWD: /usr/bin/systemctl restart dnsmasq@{{ zygote_network.interface }}.service
+{{ zygote_config.user }} ALL = NOPASSWD: /bin/systemctl restart dnsmasq@{{ zygote_network.interface }}.service
