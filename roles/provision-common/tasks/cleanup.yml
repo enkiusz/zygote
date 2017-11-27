@@ -1,9 +1,4 @@
 ---
-- name: "Wait for booting to finish for prov id {{ prov_id.stdout }}"
-  wait_for:
-    path: "{{ store_prov_dir }}/state/boot-complete"
-    timeout: "{{ bootup_timeout }}"
-
 - name: Cleanup prov "{{ prov_id.stdout }}"
   file:
     state: absent
