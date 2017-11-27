@@ -1,0 +1,17 @@
+---
+- name: "Wait for booting to finish for prov id {{ prov_id.stdout }}"
+  wait_for:
+    path: "{{ store_prov_dir }}/state/boot-complete"
+    timeout: "{{ bootup_timeout }}"
+
+- name: Cleanup prov "{{ prov_id.stdout }}"
+  file:
+    state: absent
+    path: "{{ item }}"
+  with_items:
+    - "{{ zygote_config.config_root }}/dnsmasq-{{ zygote_network.interface }}.conf.d/boot-{{ prov_id.stdout }}-options.conf"
+    - "{{ zygote_config.config_root }}/hosts-{{ zygote_network.interface }}.d/host-{{ inventory_hostname }}.conf"
+    - "{{ store_prov_dir }}"
+
+- name: Restart dnsmasq services
+  command: "sudo systemctl restart dnsmasq@{{ zygote_network.interface}}.service"

@@ -1,0 +1,5 @@
+---
+- name: "Wait for boot process for prov id {{ prov_id.stdout }} to reach state {{ state }}"
+  wait_for:
+    path: "{{ store_prov_dir }}/state/{{ state }}"
+    timeout: "{{ bootup_timeout }}"

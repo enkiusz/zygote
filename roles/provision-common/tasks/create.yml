@@ -1,0 +1,32 @@
+---
+- name: Make a boot ID
+  command: "pwgen -s -1 16"
+  run_once: True
+  register: prov_id
+
+- name: Gather facts from origin zygote
+  delegate_to: "{{ origin_zygote }}"
+  setup: 
+
+- name: Get origin zygote vars
+  delegate_to: "{{ origin_zygote }}"
+  set_fact:
+    zygote_config="{{ ansible_local.zygote_config }}"
+    zygote_store="{{ ansible_local.zygote_store }}"
+    zygote_network="{{ ansible_local.zygote_network }}"
+    imageconfig="{{ ansible_local.zygote_images[image_path | basename] }}"
+
+- name: Restart dnsmasq services
+  command: "sudo systemctl restart dnsmasq@{{ zygote_network.interface}}.service"
+
+- set_fact:
+    prov_dir: "host/{{ prov_id.stdout }}"
+    store_prov_dir: "{{ zygote_store.tftproot }}/host/{{ prov_id.stdout }}"
+
+- name: Create layout for prov "{{ prov_dir }}"
+  file: path="{{ item }}" state=directory
+  with_items:
+    - "{{ store_prov_dir }}"
+    - "{{ store_prov_dir }}/boot"
+    - "{{ store_prov_dir }}/state"
+    - "{{ store_prov_dir }}/boot/autorun"
