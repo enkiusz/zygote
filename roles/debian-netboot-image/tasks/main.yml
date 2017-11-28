@@ -26,7 +26,7 @@
   with_items: "{{ initrds.files }}"
 
 - name: Create skel pxelinux.cfg
-  copy: src="{{ store_tgt_dir }}/pxelinux.cfg/default" dest="{{ store_skel_dir }}/pxelinux.cfg.j2" remote_src=yes
+  copy: src="{{ store_tgt_dir }}/pxelinux.cfg/default" dest="{{ store_skel_dir }}/boot/pxelinux.cfg.j2" remote_src=yes
 
 - name: Rewrite debian pxelinux.cfg to boot automatically
   replace: path="{{ store_skel_dir }}/pxelinux.cfg.j2" regexp="timeout 0" replace="timeout 1"
