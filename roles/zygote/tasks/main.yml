@@ -17,7 +17,6 @@
       - sudo
       - pwgen
       - dnsmasq
-      - apt-cacher-ng
 
 - name: Create the directories (root owned)
   file: path="{{ item }}" state=directory 
@@ -77,10 +76,6 @@
 - name: Disable builtin dnsmasq
   service: name='dnsmasq.service' enabled=no state=stopped
   when: ansible_os_family == "Debian"
-
-# #
-# # TODO: Start apt-cache-ng
-# #
 
 - name: Start dnsmasq
   service: name='dnsmasq@{{ zygote_network.interface }}.service' enabled=yes state=restarted
