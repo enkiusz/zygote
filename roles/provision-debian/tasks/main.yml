@@ -34,7 +34,7 @@
 
 # Build provdir from skel files for the selected pack
 - name: Copy skel files
-  copy: src="{{ item }}" dest="{{ store_prov_dir }}/boot"
+  copy: src="{{ item }}" dest="{{ store_prov_dir }}/boot" remote_src=yes
   with_fileglob:
     - "{{ imageconfig.store_skel_dir }}/*"
 
@@ -45,7 +45,7 @@
     prefix: "zygote-{{ origin_zygote }}-host-{{ inventory_hostname }}-prov-{{ prov_id.stdout }}"
   register: local_prov_dir
 
-- shell: "find {{ store_prov_dir }} -type f"
+- shell: "find {{ imageconfig.store_skel_dir }} -type f"
   register: files_to_copy
 
 - fetch: src="{{ item }}" dest="{{ local_prov_dir.path }}/"
@@ -53,7 +53,7 @@
 
 - name: Build pxelinux.cfg
   template:
-    src: "{{ local_prov_dir.path }}/{{ inventory_hostname }}/{{ store_prov_dir }}/boot/pxelinux.cfg.j2"
+    src: "{{ local_prov_dir.path }}/{{ inventory_hostname }}/{{ imageconfig.store_skel_dir }}/boot/pxelinux.cfg.j2"
     dest: "{{ store_prov_dir }}/boot/pxelinux.cfg"
 
 - name: Build preseed

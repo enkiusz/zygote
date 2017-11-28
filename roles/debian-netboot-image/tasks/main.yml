@@ -5,6 +5,7 @@
   with_items:
     - "{{ store_tgt_dir }}"
     - "{{ store_skel_dir }}"
+    - "{{ store_skel_dir }}/boot"
 
 - name: Extract netboot archive
   unarchive: src="{{ netboot_archive }}" dest="{{ store_tgt_dir }}"
@@ -29,10 +30,10 @@
   copy: src="{{ store_tgt_dir }}/pxelinux.cfg/default" dest="{{ store_skel_dir }}/boot/pxelinux.cfg.j2" remote_src=yes
 
 - name: Rewrite debian pxelinux.cfg to boot automatically
-  replace: path="{{ store_skel_dir }}/pxelinux.cfg.j2" regexp="timeout 0" replace="timeout 1"
+  replace: path="{{ store_skel_dir }}/boot/pxelinux.cfg.j2" regexp="timeout 0" replace="timeout 1"
 
 - name: Rewrite debian pxelinux.cfg to boot the automated installer
-  replace: path="{{ store_skel_dir }}/pxelinux.cfg.j2" regexp="default .+" replace='default auto {{ "{{" }} "interface=%s" % install_iface if install_iface is defined else "" {{ "}}" }} url={{ "{{" }} kickstart_url {{ "}}" }}'
+  replace: path="{{ store_skel_dir }}/boot/pxelinux.cfg.j2" regexp="default .+" replace='default auto {{ "{{" }} "interface=%s" % install_iface if install_iface is defined else "" {{ "}}" }} url={{ "{{" }} kickstart_url {{ "}}" }}'
 
 - name: Build image desriptor
   set_fact:
@@ -41,6 +42,7 @@
       store_tgt_dir: "{{ zygote_store.tftproot }}/{{ tgt_dir }}"
       skel_dir: "{{ tgt_dir }}/skel"
       store_skel_dir: "{{ zygote_store.tftproot }}/{{ skel_dir }}"
+      http_baseurl: "{{ zygote_store.http_baseurl }}"
 
 - name: Dump configuration for this image
   copy: dest="{{ store_tgt_dir }}/imageconfig.json" content="{{ imgconfig | to_json }}"
