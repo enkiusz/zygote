@@ -95,7 +95,7 @@ d-i netcfg/hostname string {{ inventory_hostname }}
 d-i mirror/country string manual
 d-i mirror/http/hostname string http.us.debian.org
 d-i mirror/http/directory string /debian
-d-i mirror/http/proxy string {{ zygote_store.http_baseurl }}:3142
+d-i mirror/http/proxy string {{ imageconfig.apt_cache_ng_url }}
 
 # Suite to install.
 #d-i mirror/suite string testing

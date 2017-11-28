@@ -1,4 +1,35 @@
 ---
+- name: Get out zygote information from ansible_local
+  set_fact:
+    zygote_config="{{ ansible_local.zygote_config }}"
+    zygote_store="{{ ansible_local.zygote_store }}"
+    zygote_network="{{ ansible_local.zygote_network }}"
+
+- name: Install APT package cache
+  package:
+    state: present
+    name:
+      - apt-cacher-ng
+
+- name: Start apt-cacher-ng
+  service: name='apt-cacher-ng.service' enabled=yes state=restarted
+
+- name: Download the debian release information file
+  get_url: url="{{ repo_baseurl }}/Release" dest="/tmp"
+  register: debian_release_file
+
+- name: Get release codename
+  shell: "grep -E '^Codename:' {{ debian_release_file.dest }} | awk -F : '{print $2;}' | tr -d '[[:space:]]'"
+  register: debian_codename
+
+- set_fact:
+    tgt_dir: "images/debian-{{ debian_codename.stdout }}"
+    skel_dir: "images/debian-{{ debian_codename.stdout }}/skel"
+
+- set_fact:
+    store_tgt_dir: "{{ zygote_store.tftproot }}/{{ tgt_dir }}"
+    store_skel_dir: "{{ zygote_store.tftproot }}/{{ skel_dir }}"
+
 # For some of these vars look into vars/main.yml
 - name: Create dirs for Debian
   file: path="{{ item }}" state=directory
@@ -7,8 +38,11 @@
     - "{{ store_skel_dir }}"
     - "{{ store_skel_dir }}/boot"
 
+- name: Fetch netboot archive
+  get_url: url="{{ repo_baseurl }}/main/installer-amd64/current/images/netboot/netboot.tar.gz" dest="{{ store_tgt_dir }}"
+
 - name: Extract netboot archive
-  unarchive: src="{{ netboot_archive }}" dest="{{ store_tgt_dir }}"
+  unarchive: src="{{ store_tgt_dir }}/netboot.tar.gz" dest="{{ store_tgt_dir }}" remote_src=yes
 
 # Reference: https://wiki.debian.org/DebianInstaller/NetbootFirmware
 - name: Download firmware files image
@@ -39,10 +73,11 @@
   set_fact:
     imgconfig:
       tgt_dir: "{{ tgt_dir }}"
-      store_tgt_dir: "{{ zygote_store.tftproot }}/{{ tgt_dir }}"
-      skel_dir: "{{ tgt_dir }}/skel"
-      store_skel_dir: "{{ zygote_store.tftproot }}/{{ skel_dir }}"
+      store_tgt_dir: "{{ store_tgt_dir }} "
+      skel_dir: "{{ skel_dir }}"
+      store_skel_dir: "{{ store_skel_dir }}"
       http_baseurl: "{{ zygote_store.http_baseurl }}"
+      apt_cache_ng_url: "http://{{ zygote_store.http_baseurl | urlsplit('hostname') }}:3142"
 
 - name: Dump configuration for this image
   copy: dest="{{ store_tgt_dir }}/imageconfig.json" content="{{ imgconfig | to_json }}"

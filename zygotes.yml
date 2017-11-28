@@ -23,5 +23,5 @@
 
     - tags: images
       role: debian-netboot-image
-      netboot_archive: "debian-jessie-netboot.tar.gz"
+      repo_baseurl: http://http.us.debian.org/debian/dists/stable/
 
