@@ -14,7 +14,7 @@
     zygote_config="{{ ansible_local.zygote_config }}"
     zygote_store="{{ ansible_local.zygote_store }}"
     zygote_network="{{ ansible_local.zygote_network }}"
-    imageconfig="{{ ansible_local.zygote_images[image_path | basename] }}"
+    imageconfig="{{ ansible_local.zygote_images[image_name] }}"
 
 - set_fact:
     prov_dir: "host/{{ prov_id.stdout }}"

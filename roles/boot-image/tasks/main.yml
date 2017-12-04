@@ -1,0 +1,23 @@
+---
+- name: Load common provisioning tasks
+  include_role: name=provision-common tasks_from=create.yml
+
+- debug: var=provision_role
+
+- name: Load image provisioning role
+  import_role: name="{{ provision_role }}"
+
+- name: Restart dnsmasq services
+  command: "sudo systemctl restart dnsmasq@{{ zygote_network.interface}}.service"
+
+# Power on hardware
+- include: "{{ power_ctrl_task }}"
+
+- name: Execute common cleanup tasks
+  include_role: name=provision-common tasks_from=wait.yml
+  vars:
+    state: boot-complete
+    
+- name: Execute common cleanup tasks
+  include_role: name=provision-common tasks_from=cleanup.yml
+
