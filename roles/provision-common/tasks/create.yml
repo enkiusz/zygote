@@ -16,9 +16,6 @@
     zygote_network="{{ ansible_local.zygote_network }}"
     imageconfig="{{ ansible_local.zygote_images[image_path | basename] }}"
 
-- name: Restart dnsmasq services
-  command: "sudo systemctl restart dnsmasq@{{ zygote_network.interface}}.service"
-
 - set_fact:
     prov_dir: "host/{{ prov_id.stdout }}"
     store_prov_dir: "{{ zygote_store.tftproot }}/host/{{ prov_id.stdout }}"
@@ -29,4 +26,3 @@
     - "{{ store_prov_dir }}"
     - "{{ store_prov_dir }}/boot"
     - "{{ store_prov_dir }}/state"
-    - "{{ store_prov_dir }}/boot/autorun"

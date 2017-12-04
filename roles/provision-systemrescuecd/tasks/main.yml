@@ -2,6 +2,9 @@
 - name: Load common provisioning tasks
   include_role: name=provision-common tasks_from=create.yml
 
+- name: Create autorun script directory for prov "{{ prov_dir }}"
+  file: path="{{ store_prov_dir }}/boot/autorun" state=directory
+
 - name: Generate pxelinux.cfg
   template:
     src: pxelinux.cfg.j2
