@@ -1,5 +1,6 @@
 ---
-tgt_dir: "images/{{ iso_path | basename | replace('.iso','') }}"
+image_name: "{{ iso_path | basename | replace('.iso','') }}"
+tgt_dir: "images/{{ image_name }}"
 store_tgt_dir: "{{ zygote_store.tftproot }}/{{ tgt_dir }}"
 skel_dir: "{{ tgt_dir }}/skel"
 store_skel_dir: "{{ zygote_store.tftproot }}/{{ skel_dir }}"

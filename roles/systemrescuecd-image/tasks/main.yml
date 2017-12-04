@@ -40,15 +40,20 @@
 - name: Copy in SRM modules
   copy: src="{{ item }}" dest="{{ store_tgt_dir }}"
   with_items: "{{ srm_modules }}"
+  when: srm_modules is defined
 
 - name: Stat SRM modules
   stat: path="{{ store_tgt_dir }}/{{ item }}"
   with_items: "{{ srm_modules }}"
   register: srm_stat_data
+  when: srm_modules is defined
+
+- debug: var=srm_stat_data
 
 - name: Generate SRM checksum files
   copy: dest="{{ store_tgt_dir }}/{{ item.item | splitext | first }}.md5" content="{{ item.stat.md5 }} {{ item.item }}"
   with_items: "{{ srm_stat_data.results }}"
+  when: srm_stat_data.results is defined
 
 - name: Enable dnsmasq to read from the image dirs
   acl: path="{{ store_tgt_dir }}" recursive=yes etype=user entity={{ zygote_config.dnsmasq_user }} permissions=rx state=present
@@ -56,6 +61,7 @@
 - name: Build image desriptor
   set_fact:
     imgconfig:
+      image_name: "{{ image_name }}"
       tgt_dir: "{{ tgt_dir }}"
       store_tgt_dir: "{{ zygote_store.tftproot }}/{{ tgt_dir }}"
       skel_dir: "{{ tgt_dir }}/skel"

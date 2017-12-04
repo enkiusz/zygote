@@ -22,6 +22,11 @@
         - zfs-kmod-4.4.28-std490-amd64.srm
 
     - tags: images
+      role: systemrescuecd-image
+      image_name: systemrescuecd-x86-default
+      iso_path: "systemrescuecd-x86-4.9.0.iso"
+
+    - tags: images
       role: debian-netboot-image
       repo_baseurl: http://http.us.debian.org/debian/dists/stable/
 
