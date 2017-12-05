@@ -30,7 +30,6 @@
     store_tgt_dir: "{{ zygote_store.tftproot }}/{{ tgt_dir }}"
     store_skel_dir: "{{ zygote_store.tftproot }}/{{ skel_dir }}"
 
-# For some of these vars look into vars/main.yml
 - name: Create dirs for Debian
   file: path="{{ item }}" state=directory
   with_items:
