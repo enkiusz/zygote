@@ -80,3 +80,7 @@
 
 - name: Dump configuration for this image
   copy: dest="{{ store_tgt_dir }}/imageconfig.json" content="{{ imgconfig | to_json }}"
+
+- name: Reload facts to read the ansible_local
+  setup:
+
