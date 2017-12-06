@@ -67,6 +67,7 @@
       skel_dir: "{{ tgt_dir }}/skel"
       store_skel_dir: "{{ zygote_store.tftproot }}/{{ skel_dir }}"
       http_baseurl: "{{ zygote_store.http_baseurl }}"
+      provision_role: "{{ provision_role }}"
 
 - name: Dump configuration for this image
   copy: dest="{{ store_tgt_dir }}/imageconfig.json" content="{{ imgconfig | to_json }}"

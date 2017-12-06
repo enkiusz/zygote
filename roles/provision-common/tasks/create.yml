@@ -3,13 +3,13 @@
   command: "pwgen -s -1 16"
   run_once: True
   register: prov_id
+  when: prov_id is not defined
 
-- name: Gather facts from origin zygote
-  delegate_to: "{{ origin_zygote }}"
-  setup: 
+- set_fact:
+    prov_id: "{{ prov_id.stdout }}"
+  when: prov_id.stdout is defined
 
 - name: Get origin zygote vars
-  delegate_to: "{{ origin_zygote }}"
   set_fact:
     zygote_config="{{ ansible_local.zygote_config }}"
     zygote_store="{{ ansible_local.zygote_store }}"
@@ -17,8 +17,8 @@
     imageconfig="{{ ansible_local.zygote_images[image_name] }}"
 
 - set_fact:
-    prov_dir: "host/{{ prov_id.stdout }}"
-    store_prov_dir: "{{ zygote_store.tftproot }}/host/{{ prov_id.stdout }}"
+    prov_dir: "host/{{ prov_id }}"
+    store_prov_dir: "{{ zygote_store.tftproot }}/host/{{ prov_id }}"
 
 - name: Create layout for prov "{{ prov_dir }}"
   file: path="{{ item }}" state=directory
@@ -26,3 +26,7 @@
     - "{{ store_prov_dir }}"
     - "{{ store_prov_dir }}/boot"
     - "{{ store_prov_dir }}/state"
+
+- name: Add permissions to allow access by state-report.cgi
+  acl: path="{{ store_prov_dir }}/state" etype=user entity="{{ zygote_config.user }}" permissions=rwx state=present
+

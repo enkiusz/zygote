@@ -1,0 +1,13 @@
+---
+- name: Load common provisioning tasks
+  include_role: name=provision-common tasks_from=create.yml
+
+- name: Load image provisioning role
+  import_role: name="{{ provision_role }}"
+
+- name: Build dnsmasq rule file
+  template: src=prov-dhcpmatch.conf.j2 dest="{{ zygote_config.config_root }}/dnsmasq-{{ zygote_network.interface }}.conf.d/{{ prov_id }}-dhcp.conf"
+
+- name: Restart dnsmasq services
+  command: "sudo systemctl restart dnsmasq@{{ zygote_network.interface}}.service"
+

@@ -1,0 +1,4 @@
+---
+# Match x86 PXE architecture
+# Reference: https://technet.microsoft.com/en-us/library/cc725614(v=ws.10).aspx 
+match_rule: "option:client-arch,0"

@@ -1,4 +1,4 @@
 #!/bin/sh
 
-wget '{{ zygote_store.report_state_url }}?id={{ prov_id.stdout }}&state=boot-complete'
+wget '{{ zygote_store.report_state_url }}?id={{ prov_id }}&state=boot-complete'
 

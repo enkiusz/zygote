@@ -30,3 +30,10 @@
       role: debian-netboot-image
       repo_baseurl: http://http.us.debian.org/debian/dists/stable/
 
+    - tags: default-images
+      # This is a well-known provisioning name, not a single-shot one
+      prov_id: default-x86
+      role: provision-default
+      image_name: systemrescuecd-x86-default
+      provision_role: provision-systemrescuecd
+

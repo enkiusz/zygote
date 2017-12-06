@@ -16,11 +16,5 @@
     - autorun2.j2
     - autorun9.j2
 
-- name: Add permissions to allow access by state-report.cgi
-  acl: path="{{ store_prov_dir }}/state" etype=user entity="{{ zygote_config.user }}" permissions=rwx state=present
-
 - name: Build dnsmasq boot options config
-  template: src=prov-bootoptions.conf.j2 dest="{{ zygote_config.config_root }}/dnsmasq-{{ zygote_network.interface }}.conf.d/boot-{{ prov_id.stdout }}-options.conf"
-
-- name: Build dnsmasq host file
-  template: src=prov-hostoptions.conf.j2 dest="{{ zygote_config.config_root }}/hosts-{{ zygote_network.interface }}.d/host-{{ inventory_hostname }}.conf"
+  template: src=prov-bootoptions.conf.j2 dest="{{ zygote_config.config_root }}/dnsmasq-{{ zygote_network.interface }}.conf.d/boot-{{ prov_id }}-options.conf"
