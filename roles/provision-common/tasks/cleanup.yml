@@ -1,10 +1,10 @@
 ---
-- name: Cleanup prov "{{ prov_id.stdout }}"
+- name: Cleanup prov "{{ prov_id }}"
   file:
     state: absent
     path: "{{ item }}"
   with_items:
-    - "{{ zygote_config.config_root }}/dnsmasq-{{ zygote_network.interface }}.conf.d/boot-{{ prov_id.stdout }}-options.conf"
+    - "{{ zygote_config.config_root }}/dnsmasq-{{ zygote_network.interface }}.conf.d/boot-{{ prov_id }}-options.conf"
     - "{{ zygote_config.config_root }}/hosts-{{ zygote_network.interface }}.d/host-{{ inventory_hostname }}.conf"
     - "{{ store_prov_dir }}"
 

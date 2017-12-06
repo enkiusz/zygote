@@ -6,5 +6,5 @@ mkdir -p /target/root/.ssh
 {% endfor %}
 chmod 400 /target/root/.ssh/authorized_keys
 
-wget -O - '{{ zygote_store.report_state_url }}?id={{ prov_id.stdout }}&state=finished-preseed-late-command'
+wget -O - '{{ zygote_store.report_state_url }}?id={{ prov_id }}&state=finished-preseed-late-command'
 
