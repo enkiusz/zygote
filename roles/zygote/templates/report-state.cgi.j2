@@ -18,5 +18,7 @@ if id is None or state is None:
 if not re.match(r"[a-zA-Z0-9-_]+", id):
     sys.exit(0)
 
-open(os.path.join('{{ zygote_store.tftproot }}', 'host', id, 'state', state), 'wb').close()
+with open(os.path.join('{{ zygote_store.tftproot }}', 'host', id, 'state', state), 'wb') as f:
+    if 'data' in form and form['data'].file:
+        f.write(form['data'].file.read())
 
