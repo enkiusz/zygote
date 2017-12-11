@@ -1,20 +1,25 @@
 ---
+
 - name: Create autorun script directory for prov "{{ prov_dir }}"
-  file: path="{{ store_prov_dir }}/boot/autorun" state=directory
+  file: path="{{ store_prov_dir }}/boot/autorun.d" state=directory
 
 - name: Generate pxelinux.cfg
   template:
     src: pxelinux.cfg.j2
     dest: "{{ store_prov_dir }}/boot/pxelinux.cfg"
 
-- name: Generate autorun script for SSH key setup
+- name: Generate master autorun script
   template:
-    src: "autorun/{{ item }}"
-    dest: "{{ store_prov_dir }}/boot/autorun/{{ item | splitext | first }}"
-  with_items:
-    - autorun1.j2
-    - autorun2.j2
-    - autorun9.j2
+    src: autorun.j2
+    dest: "{{ store_prov_dir }}/boot/autorun"
+
+- name: Generate basic autorun scripts
+  include_role:
+    name: provision-systemrescuecd
+    tasks_from: add_autorun.yml
+  vars:
+    script: "{{ item }}"
+  with_items: "{{ autorun_parts }}"
 
 - name: Build dnsmasq boot options config
   template: src=prov-bootoptions.conf.j2 dest="{{ zygote_config.config_root }}/dnsmasq-{{ zygote_network.interface }}.conf.d/boot-{{ prov_id }}-options.conf"

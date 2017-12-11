@@ -6,7 +6,7 @@ DEFAULT rescuecd_auto
 
 LABEL rescuecd_auto
 KERNEL ifcpu64.c32
-APPEND rescue64 setkmap=us {% if srm_modules is defined %} loadsrm={{ srm_modules | join(',')}} {% endif %} ar_nowait ar_source={{ zygote_store.http_baseurl }}/{{ prov_dir }}/boot/autorun autoruns=1,2,9 netboot={{ zygote_store.http_baseurl }}/{{ imageconfig.tgt_dir }}/sysrcd.dat docache -- rescue32 setkmap=us {% if srm_modules is defined %} loadsrm={{ srm_modules | join(',')}} {% endif %} ar_nowait ar_source={{ zygote_store.http_baseurl }}/{{ prov_dir }}/boot/autorun autoruns=1,2,9 netboot=http://{{ zygote_store.http_baseurl }}/{{ imageconfig.tgt_dir }}/sysrcd.dat docache
+APPEND rescue64 setkmap=us {% if srm_modules is defined %} loadsrm={{ srm_modules | join(',')}} {% endif %} ar_nowait ar_source={{ zygote_store.http_baseurl }}/{{ prov_dir }}/boot/ netboot={{ zygote_store.http_baseurl }}/{{ imageconfig.tgt_dir }}/sysrcd.dat docache -- rescue32 setkmap=us {% if srm_modules is defined %} loadsrm={{ srm_modules | join(',')}} {% endif %} ar_nowait ar_source={{ zygote_store.http_baseurl }}/{{ prov_dir }}/boot netboot=http://{{ zygote_store.http_baseurl }}/{{ imageconfig.tgt_dir }}/sysrcd.dat docache
 
 LABEL rescue32
 MENU HIDE

@@ -1,0 +1,13 @@
+#!/bin/sh
+
+readonly AUTORUN_BASEURL="{{ zygote_store.http_baseurl }}/{{ prov_dir }}/boot"
+
+readonly AUTORUN_TMP=/tmp/autorun-$(date -Is)
+mkdir -p "$AUTORUN_TMP"
+
+curl "$AUTORUN_BASEURL/autorun.parts.manifest" | while read url; do
+    dest="$AUTORUN_TMP"/$(basename "$url")
+    wget -O "$dest" "$url"
+    chmod +x "$dest"
+    $dest
+done

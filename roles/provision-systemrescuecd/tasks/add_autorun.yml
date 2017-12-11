@@ -1,0 +1,8 @@
+---
+- name: Put script "{{ script }}" in autorun parts dir for prov "{{ prov_id }}"
+  template:
+    src: "{{ script }}"
+    dest: "{{ store_prov_dir }}/boot/autorun.d/{{ script | basename | splitext | first }}"
+
+- name: Register script "{{ script }}"
+  lineinfile: state=present create=yes line="{{ zygote_store.http_baseurl }}/{{ prov_dir }}/boot/autorun.d/{{ script | basename | splitext | first }}" path="{{ store_prov_dir }}/boot/autorun.parts.manifest"

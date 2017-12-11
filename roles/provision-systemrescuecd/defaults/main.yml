@@ -1,0 +1,6 @@
+---
+autorun_parts:
+    - autorun/set-hostname.sh.j2
+    - autorun/authorize-ssh-keys.sh.j2
+    - autorun/notify-boot-complete.sh.j2
+
