@@ -1,0 +1,67 @@
+#!/bin/sh
+
+[[ $(id -u) != 0 ]] && SUDO="sudo"
+
+dmi_value() {
+    local name="$1"; shift
+    $SUDO dmidecode -s "$name" | sed -e 's/[ \t\n]*$//g' -e 's/^[ \t\n]*//g'
+}
+
+dmi_build_tag() {
+    local tag=''
+    while [ "$1" ]; do
+	local dmi_property="$1"; shift
+	unset crit_flag
+	# Property names prefixed with ! are required and can't be null for the tag to be built
+	[[ ${dmi_property} =~ '^!' ]] && local crit_flag=1
+	local dmi_value=$(dmi_value ${dmi_property#!})
+	[[ -n "$crit_flag" && -z "$dmi_value" ]] && return 1
+	tag="$tag-$dmi_value"
+    done
+    echo -n ${tag#-}
+}
+readonly ts=$(date -u '+%Y%m%dT%H%M%SZ')
+
+dir="survey"
+[[ -n "$(dmi_value system-uuid)" ]] && dir="$(dmi_value system-uuid)"
+
+unset alias
+for prefix in system baseboard; do
+    tag=$(dmi_build_tag !$prefix-manufacturer !$prefix-product-name $prefix-version $prefix-serial-number)
+    if [[ -n "$tag" ]]; then alias=$tag; break; fi
+done  
+
+echo "Survey will be created in directory '$dir' ${alias:+(alias '$alias')}"
+
+mkdir -p "$dir/metadata"
+
+# Content version 0.1 BEGINS
+echo '0.1' > "$dir/metadata/version"
+
+date -Is --utc > "$dir/metadata/ctime"
+dmesg > "$dir/dmesg"
+cp /proc/cpuinfo "$dir/cpuinfo"
+$SUDO lshw -xml > "$dir/lshw.xml" 2>&1
+$SUDO lshw > "$dir/lshw" 2>&1
+# Read using dmidecode --from-file
+$SUDO dmidecode --dump --dump-bin "$dir/dmidecode.bin" > "$dir/dmidecode.bin.log" 2>&1
+$SUDO dmidecode > "$dir/dmidecode" 2>&1
+$SUDO vpddecode > "$dir/vpddecode.bin" 2>&1
+$SUDO biosdecode > "$dir/biosdecode" 2>&1
+# Read using lspci -F
+$SUDO lspci -D -xxxx > "$dir/lspci.bin" 2>&1
+$SUDO lspci -vvvv -xxxx > "$dir/lspci" 2>&1
+$SUDO lsusb -vvvv > "$dir/lsusb" 2> "$dir/lsusb.errors"
+mkdir -p "$dir/acpi"
+$SUDO cp -r /sys/firmware/acpi/tables "$dir/acpi"
+$SUDO chown $UID "$dir"/acpi/tables/*
+# Content version 0.1 ENDS
+
+[[ -n "$alias" ]] && ln -s -- "$dir" "$alias"
+
+readonly survey_tarfile="${dir}_${ts}.tar.gz"
+tar -czf "$survey_tarfile" -- "$dir" "$alias" || { echo "Cannot create tar file '$survey_tarfile' from directory '$dir'"; exit 1; }
+rm -r -- "$dir" "$alias"
+
+curl -F "prov_id={{ prov_id }}" -F "host_id=$alias" -F "data=@$survey_tarfile" 'http://192.168.10.2/cgi-bin/upload-survey.cgi'
+

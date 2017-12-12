@@ -1,0 +1,28 @@
+#!/usr/bin/env python2
+# {{ ansible_managed }}
+
+import cgi, re, sys, os
+import cgitb; cgitb.enable()  # for troubleshooting
+
+print "Content-type: text/html"
+print
+
+form = cgi.FieldStorage()
+
+prov_id = form.getvalue("prov_id", None)
+host_id = form.getvalue("host_id", None)
+
+if prov_id is None or host_id is None:
+    sys.exit(0)
+
+if not re.match(r"[a-zA-Z0-9-_]+", prov_id):
+    sys.exit(0)
+
+if not re.match(r"[a-zA-Z0-9-_]+", host_id):
+    sys.exit(0)
+
+
+with open(os.path.join('{{ zygote_store.tftproot }}', 'host', prov_id, 'surveys', host_id), 'wb') as f:
+    if 'data' in form and form['data'].file:
+        f.write(form['data'].file.read())
+

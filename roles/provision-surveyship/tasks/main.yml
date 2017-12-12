@@ -1,0 +1,24 @@
+---
+- name: Install survey upload CGI script
+  template: src="{{ item.src }}" dest="{{ item.dest if item.dest is defined else (item.destdir + '/' + (item.src | basename | replace('.j2',''))) }}"
+  with_items:
+    - src: upload-survey.cgi.j2
+      destdir: "{{ zygote_store.tftproot }}/cgi-bin"
+
+- name: Make report-state CGI executable
+  file: path="{{ zygote_store.tftproot }}/cgi-bin/upload-survey.cgi" state=file mode="0755"
+
+- name: Generate surveyship autorun scripts
+  include_role:
+    name: provision-systemrescuecd
+    tasks_from: add_autorun.yml
+  vars:
+    script: "{{ item }}"
+  with_items: "{{ surveyship_autorun_parts }}"
+
+- name: Create destination directory for surveys gathered by prov "{{ prov_dir }}"
+  file: path="{{ store_prov_dir }}/surveys" state=directory
+
+- name: Add permissions to allow access by upload-survey.cgi
+  acl: path="{{ store_prov_dir }}/surveys" etype=user entity="{{ zygote_config.user }}" permissions=rwx state=present
+

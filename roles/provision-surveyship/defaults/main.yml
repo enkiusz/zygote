@@ -1,0 +1,4 @@
+---
+surveyship_autorun_parts:
+  - pc-linux-survey.sh.j2
+
