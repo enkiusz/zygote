@@ -24,16 +24,18 @@
     - tags: images
       role: systemrescuecd-image
       image_name: systemrescuecd-x86-default
-      iso_path: "systemrescuecd-x86-4.9.0.iso"
+      iso_path: "systemrescuecd-x86-4.9.6.iso"
 
     - tags: images
       role: debian-netboot-image
+      image_name: debian-x86-default
       repo_baseurl: http://http.us.debian.org/debian/dists/stable/
 
     - tags: default-images
-      # This is a well-known provisioning name, not a single-shot one
-      prov_id: default-x86
       role: provision-default
       image_name: systemrescuecd-x86-default
-      provision_role: provision-systemrescuecd
+      provision_role: provision-surveyship
+
+      # This is a well-known provisioning name, not a single-shot one
+      prov_id: default-x86
 
