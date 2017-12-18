@@ -11,6 +11,3 @@ minmay  ansible_user=root power_ctrl_task=common/esxi-vm-power.yml
 win11test power_ctrl_task=common/esxi-vm-power.yml
 debiantest ansible_user=root ansible_host=192.168.4.112 power_ctrl_task=common/esxi-vm-power.yml
 subdebian ansible_user=root ansible_host=192.168.10.100 power_ctrl_task=common/esxi-vm-power.yml
-
-[whitestars]
-whitestar-toyota pxe_mac=e0:cb:4e:2e:2b:1a ansible_user=root ansible_host=192.168.4.132 origin_zygote=shoggoth power_ctrl_task=common/manual-power.yml
