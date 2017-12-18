@@ -9,6 +9,7 @@ zygote_config:
 
 zygote_network:
   interface: node-network
+  dns_domain: zygote.local
 
 zygote_store:
   tftproot: /tftproot

@@ -22,7 +22,7 @@ Vagrant.configure("2") do |config|
     }
     ansible.host_vars = {
       "default" => {
-        "zygote_network" => '{"interface": "eth1","gateway":"192.168.10.1"}'
+        "zygote_network" => '{"interface": "eth1","gateway":"192.168.10.1","dns_domain":"provnet0.local"}'
       }
     }
   end
