@@ -62,6 +62,10 @@
     - src: report-state.cgi.j2
       destdir: "{{ zygote_store.tftproot }}/cgi-bin"
 
+- name: Setup gateway DHCP option
+  copy: dest="{{ zygote_config.config_root}}/dnsmasq-{{ zygote_network.interface }}.conf.d/gateway.conf" content="dhcp-option=option:router,{{ zygote_network.gateway }}"
+  when: zygote_network.gateway
+
 - name: Make report-state CGI executable
   file: path="{{ zygote_store.tftproot }}/cgi-bin/report-state.cgi" state=file mode="0755"
 
