@@ -18,6 +18,9 @@
       - pwgen
       - dnsmasq
 
+- name: Install dnsmasq configuration helper script
+  copy: src=merge-parts dest=/usr/local/bin mode=0755
+
 - name: Create the directories (root owned)
   file: path="{{ item }}" state=directory 
   with_items:
@@ -32,6 +35,10 @@
     - "{{ zygote_store.tftproot }}/images"
     - "{{ zygote_config.config_root }}/hosts-{{ zygote_network.interface }}.d"
     - "{{ zygote_config.config_root}}/dnsmasq-{{ zygote_network.interface }}.conf.d"
+    - "{{ zygote_config.config_root}}/dnsmasq-{{ zygote_network.interface }}.conf.d/10-parameters.conf.d"
+    - "{{ zygote_config.config_root}}/dnsmasq-{{ zygote_network.interface }}.conf.d/30-hosts.conf.d"
+    - "{{ zygote_config.config_root}}/dnsmasq-{{ zygote_network.interface }}.conf.d/50-groups.conf.d"
+    - "{{ zygote_config.config_root}}/dnsmasq-{{ zygote_network.interface }}.conf.d/70-provisioned-images.conf.d"
 
 - name: Get the IPv4 address of the interface where the nodes are
   set_fact: nginx_ipv4_address="{{ hostvars[inventory_hostname]['ansible_' + zygote_network.interface].ipv4.address }}"
@@ -55,6 +62,8 @@
       destdir: "/etc/nginx/sites-available"
     - src: allow-dnsmasq-restart.j2
       destdir: /etc/sudoers.d
+    - src: 01-architectures.conf.j2
+      destdir: "{{ zygote_config.config_root}}/dnsmasq-{{ zygote_network.interface }}.conf.d/10-parameters.conf.d"
     - src: dnsmasq.conf.j2
       dest: "{{ zygote_config.config_root }}/dnsmasq-{{ zygote_network.interface }}.conf"
     - src: host-index.html
@@ -63,7 +72,7 @@
       destdir: "{{ zygote_store.tftproot }}/cgi-bin"
 
 - name: Setup gateway DHCP option
-  copy: dest="{{ zygote_config.config_root}}/dnsmasq-{{ zygote_network.interface }}.conf.d/gateway.conf" content="dhcp-option=option:router,{{ zygote_network.gateway }}"
+  copy: dest="{{ zygote_config.config_root}}/dnsmasq-{{ zygote_network.interface }}.conf.d/10-parameters.conf.d/gateway.conf" content="dhcp-option=option:router,{{ zygote_network.gateway }}\n"
   when: zygote_network.gateway
 
 - name: Make report-state CGI executable

@@ -5,9 +5,9 @@ After=network.target
 
 [Service]
 Type=simple
+ExecStartPre=/bin/sh -c "/usr/local/bin/merge-parts {{ zygote_config.config_root}}/dnsmasq-{{ zygote_network.interface }}.conf.d > {{ zygote_config.config_root}}/dnsmasq-{{ zygote_network.interface }}.parts.conf"
 ExecStartPre=/usr/sbin/dnsmasq --test
 ExecStart=/usr/sbin/dnsmasq -k --user=dnsmasq -C {{ zygote_config.config_root }}/dnsmasq-%i.conf
-ExecReload=/bin/kill -HUP $MAINPID
 
 [Install]
 WantedBy=multi-user.target

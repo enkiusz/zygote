@@ -1,0 +1,12 @@
+#!/bin/sh
+
+while [ "$1" ]; do
+      file="$1"; shift
+      if [ -d "$file" ]; then
+            find $file -mindepth 1 -maxdepth 1 | sort | xargs $0
+      elif [ -x "$file" ]; then
+           "./$file"
+      elif [ -r "$file" ]; then
+           cat "$file"
+      fi
+done

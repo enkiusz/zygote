@@ -10,7 +10,7 @@
   import_role: name="{{ provision_role }}"
 
 - name: Build dnsmasq host file
-  template: src=prov-hostoptions.conf.j2 dest="{{ zygote_config.config_root }}/hosts-{{ zygote_network.interface }}.d/host-{{ inventory_hostname }}.conf"
+  template: src=prov-hostoptions.conf.j2 dest="{{ zygote_config.config_root }}/dnsmasq-eth1.conf.d/30-hosts.conf.d/host-{{ inventory_hostname }}.conf"
 
 - name: Restart dnsmasq services
   command: "sudo systemctl restart dnsmasq@{{ zygote_network.interface}}.service"

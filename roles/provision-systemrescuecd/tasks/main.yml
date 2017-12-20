@@ -22,4 +22,4 @@
   with_items: "{{ autorun_parts }}"
 
 - name: Build dnsmasq boot options config
-  template: src=prov-bootoptions.conf.j2 dest="{{ zygote_config.config_root }}/dnsmasq-{{ zygote_network.interface }}.conf.d/boot-{{ prov_id }}-options.conf"
+  template: src=prov-bootoptions.conf.j2 dest="{{ zygote_config.config_root }}/dnsmasq-{{ zygote_network.interface }}.conf.d/70-provisioned-images.conf.d/boot-{{ prov_id }}.conf"

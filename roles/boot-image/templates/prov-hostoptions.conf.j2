@@ -1,1 +1,2 @@
-{{ pxe_mac }},set:boot-{{ prov_id }}
+dhcp-mac=set:boot-{{ prov_id }},{{ pxe_mac }}
+tag-if=set:provisioned-boot,tag:boot-{{ prov_id }}
