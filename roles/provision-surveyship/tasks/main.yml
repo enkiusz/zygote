@@ -5,7 +5,7 @@
     - src: upload-survey.cgi.j2
       destdir: "{{ zygote_store.tftproot }}/cgi-bin"
 
-- name: Make report-state CGI executable
+- name: Make survey uploader CGI executable
   file: path="{{ zygote_store.tftproot }}/cgi-bin/upload-survey.cgi" state=file mode="0755"
 
 - name: Generate surveyship autorun scripts
